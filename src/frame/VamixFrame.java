@@ -14,6 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import panel.DownloadPanel;
 import panel.MainPanel;
 import panel.MediaPanel;
 
@@ -33,12 +34,16 @@ public class VamixFrame extends JFrame implements ActionListener {
 	
 	private JMenu panelMenu = new JMenu("Panel");
 	private JMenuItem mainPanelOption = new JMenuItem("Main"); 
+	private JMenuItem downloadPanelOption = new JMenuItem("Download");
 	
 	private JMenu mediaMenu = new JMenu("Media");
 	private JMenuItem openMenuOption = new JMenuItem("Open..");
 	
 	private MainPanel mainPanel = MainPanel.getInstance();
 	private final String MAIN = "Main";
+	
+	private DownloadPanel downloadPanel = DownloadPanel.getInstance();
+	private final String DOWNLOAD = "Download";
 	
 	public VamixFrame() {
 		super("VAMIX");
@@ -51,6 +56,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 		setJMenuBar(menuBar);
 		
 		panels.add(mainPanel, MAIN);
+		panels.add(downloadPanel, DOWNLOAD);
 		
 		add(panels);
 		
@@ -59,6 +65,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 	
 	private void setMenuBar() {
 		panelMenu.add(mainPanelOption);
+		panelMenu.add(downloadPanelOption);
 		
 		mediaMenu.add(openMenuOption);
 		
@@ -69,6 +76,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 	private void addListeners() {
 		openMenuOption.addActionListener(this);
 		mainPanelOption.addActionListener(this);
+		downloadPanelOption.addActionListener(this);
 		
 		// Makes sure when window closes, it releases the mediaPlayer.
 		addWindowListener(new WindowAdapter() {
@@ -87,9 +95,13 @@ public class VamixFrame extends JFrame implements ActionListener {
 		if (e.getSource() == openMenuOption) {
 			MediaPanel.getInstance().playFile();
 		} else if (e.getSource() == mainPanelOption) {
-			//card layout for future design changes
+			// Shows main menu panel.
 			CardLayout c = (CardLayout)panels.getLayout();
 			c.show(panels, MAIN);
+		} else if (e.getSource() == downloadPanelOption) {
+			// Shows download menu panel.
+			CardLayout c = (CardLayout)panels.getLayout();
+			c.show(panels, DOWNLOAD);
 		}
 	}
 	

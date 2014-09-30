@@ -52,8 +52,6 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 	private JPanel timePanel = new JPanel(new MigLayout());
 	private JPanel buttonPanel = new JPanel(new MigLayout());
 	
-	private DownloadPanel downloadPanel = new DownloadPanel();
-	
 	public JButton playButton = new JButton(MediaIcon.getIcon(Playback.PLAY));
 	public JButton stopButton = new JButton(MediaIcon.getIcon(Playback.STOP));
 	public JButton fastforwardButton = new JButton(MediaIcon.getIcon(Playback.FASTFORWARD));
@@ -61,7 +59,6 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 	public JButton muteButton = new JButton(MediaIcon.getIcon(Playback.UNMUTE));
 	public JButton maxVolumeButton = new JButton(MediaIcon.getIcon(Playback.MAXVOLUME));
 	public JButton openButton = new JButton(MediaIcon.getIcon(Playback.OPEN));
-	public JButton downloadButton = new JButton(MediaIcon.getIcon(Playback.DOWNLOAD));
 	
 	public JLabel startTimeLabel = new JLabel(initialTimeDisplay); // Initial labels
 	public JLabel finishTimeLabel = new JLabel(initialTimeDisplay);
@@ -168,22 +165,11 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 		openButton.setContentAreaFilled(false);
 
 		buttonPanel.add(openButton, "align right, pushx");
-		
-		downloadButton.setToolTipText("Download media file");
-		downloadButton.setBorderPainted(false);
-		downloadButton.setFocusPainted(false);
-		downloadButton.setContentAreaFilled(false);
-
-		buttonPanel.add(downloadButton);
 	}
 	
 	private void setPlaybackPanel() {
 		playbackPanel.add(timePanel, "north, pushx, growx, wrap 0px");
 		playbackPanel.add(buttonPanel, "pushx, growx");
-		
-		playbackPanel.add(downloadPanel, "south, pushx, growx");
-		downloadPanel.setVisible(false);
-		
 	}
 	
 	// Adds any listeners onto component.
@@ -196,7 +182,6 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 		muteButton.addActionListener(this);
 		maxVolumeButton.addActionListener(this);
 		openButton.addActionListener(this);
-		downloadButton.addActionListener(this);
 		
 		// Jslider change listeners
 		volumeSlider.addChangeListener(this);
@@ -283,18 +268,6 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 	            	openButton.setBorderPainted(true);
 	            } else {
 	            	openButton.setBorderPainted(false);
-	            }
-	        }
-	    });
-		
-		downloadButton.getModel().addChangeListener(new ChangeListener() {
-	        @Override
-	        public void stateChanged(ChangeEvent e) {
-	            ButtonModel model = (ButtonModel) e.getSource();
-	            if (model.isRollover()) {
-	            	downloadButton.setBorderPainted(true);
-	            } else {
-	            	downloadButton.setBorderPainted(false);
 	            }
 	        }
 	    });
@@ -438,12 +411,6 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 			mediaPlayer.setVolume(200);
 		} else if (e.getSource() == openButton) {
 			playFile();
-		} else if (e.getSource() == downloadButton){
-			if (downloadPanel.isVisible()) {
-				downloadPanel.setVisible(false);
-			} else {
-				downloadPanel.setVisible(true);
-			}
 		}
 	}
 	

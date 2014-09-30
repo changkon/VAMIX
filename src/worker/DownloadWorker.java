@@ -1,144 +1,159 @@
 package worker;
 
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-
-import javax.swing.ProgressMonitor;
-import javax.swing.SwingWorker;
-import javax.swing.JOptionPane;
-
-import java.lang.Exception;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/** Handles the download process and the threading
- * 
- */
+import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
+import javax.swing.table.DefaultTableModel;
 
-public class DownloadWorker extends SwingWorker<Integer,Integer>{
+import panel.DownloadPanel;
+import listener.RowListener;
+
+public class DownloadWorker extends SwingWorker<Void, Integer[]> {
+	private String url;
+	private String filename;
+	private int exitStatus;
+	private RowListener rowListener;
+	private DefaultTableModel model;
+	private ConcurrentHashMap<String, DownloadWorker> downloadList;
 	
-	private ProcessBuilder builder;
-	private Process process;
-	private ProgressMonitor monitor;
-	
-	public DownloadWorker(String URL, ProgressMonitor monitor, String path){
-		builder = new ProcessBuilder("/bin/bash","-c","wget -c " + URL + " -P " + path);
-		this.monitor = monitor;
-				
+	public DownloadWorker(String url, String filename) {
+		this.url = url;
+		this.filename = filename;
+		model = DownloadPanel.getInstance().getModel();
+		downloadList = DownloadPanel.getInstance().getDownloadList();
+		rowListener = new RowListener(filename, model);
+		model.addTableModelListener(rowListener);
 	}
-	//calculation heavy processes to be done on background thread
-	@SuppressWarnings("unused")
+
 	@Override
-	protected Integer doInBackground() throws Exception{							
-		Integer exitStatus = -1;
-		//show the progress bar and the cancel button
-		
-		//redirect stderror to stdout and process it below
-		String line = null;							
-		String stdOutput = null;
-		builder.redirectErrorStream(true);
-		
-		//start the process
-		process = builder.start();
-		InputStream out = process.getInputStream();
-		InputStream err = process.getErrorStream();
-		BufferedReader stdout = new BufferedReader(new InputStreamReader(out));
-		BufferedReader stderr = new BufferedReader(new InputStreamReader(err));
+	protected Void doInBackground() {
+
+		try {
+			ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "wget -c " + url);
+			// Note: wget normally outputs log messages onto stderr.
+			builder.redirectErrorStream(true);
+			Process process = builder.start();
+			
+			// Add this to hash map with filename as key and download as value.
+			downloadList.put(filename, this);
+			
+			InputStream stdout = process.getInputStream();
+			BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
+			String line = null;
+
+			// Regex patterns to extract percentage and time left on screen.
+			Pattern percentage = Pattern.compile("\\d?\\d?\\d{1}[%]{1}");
+			Pattern timeRemaining = Pattern.compile("\\d+[s]{1}");
+			
+			Integer[] displayValues = new Integer[2];
+			
+			Matcher p, tR;
+			
+			// Reads from buffer and stops either when there is no more input or cancel button has been clicked.
+			while((line = buffer.readLine()) != null) {
+				if (isCancelled()) {
+					process.destroy();
+					break;
+				}
 				
-		
-			//process the stdout to %			
-			while ((stdOutput = stdout.readLine()) != null && !isCancelled() && !monitor.isCanceled()) {
-				line = stdOutput;
-				String[] teemp = stdOutput.split("%");
-				String temp = teemp[0];
-				String substring = ( temp.length() > 2 ) ? temp.substring(temp.length() - 2) : temp;
-				substring = substring.replaceAll("\\s+","");
-					if(checkInteger(substring)){
-						Integer perc = (Integer) Integer.parseInt(substring);
-						if(perc != 88){	
-							publish(perc);
-						}
-					}	
-			}
-			//if the swingworker is cancelled destroy the process
-			//hide the button and the progress bar
-			if(isCancelled() || monitor.isCanceled()){
-				process.destroy();
-				monitor.close();
-			}
-		
-		//wait for the process to finish
-		process.waitFor();	
-		//process the exit status of WGET
-		exitStatus = process.exitValue();
-		return exitStatus;
+				p = percentage.matcher(line);
+				tR = timeRemaining.matcher(line);
 				
-	}
-	
-	@Override
-	protected void done(){
-		monitor.close();
-		try{//if successful, log it
-			if(get() == 0){
-				JOptionPane.showMessageDialog(null, "Successful Download! Please press okay!");
-				//PrintWriter writer = null;
-			}
-			else{//if not successful, return the error code decomposition
-				if(get() == 1){
-					JOptionPane.showMessageDialog(null, "Generic Error Code. Press okay!");
-				}else if(get() == 2){
-					JOptionPane.showMessageDialog(null, "Prase Error. Press okay!");
-				}else if(get() == 3){
-					JOptionPane.showMessageDialog(null, "File IO Error. Press okay!");
-				}else if(get() == 4){
-					JOptionPane.showMessageDialog(null, "Make sure your URL is correct. Press okay!");
-				}else if(get() == 5){
-					JOptionPane.showMessageDialog(null, "SSL verification failure. Press okay!");
-				}else if(get() == 6){
-					JOptionPane.showMessageDialog(null, "Username/password authentication failure. Press okay!");
-				}else if(get() == 7){
-					JOptionPane.showMessageDialog(null, "Protocol Errors. Press okay!");
-				}else if(get() == 8){
-					JOptionPane.showMessageDialog(null, "Server issued an error response. Press okay!");
-				}else{
-					JOptionPane.showMessageDialog(null, "Download did not complete! Type the same URL to resume download!");
+				// Stores Integer values into Integer array by removing non integer values from the string. Auto boxing.
+				if (p.find() && tR.find()) {
+					displayValues[0] = Integer.parseInt(p.group().replace("%", ""));
+					displayValues[1] = Integer.parseInt(tR.group().replace("s", ""));
+					publish(displayValues);
 				}
 			}
-		}catch(InterruptedException ie){
-			ie.printStackTrace();
-		}catch(ExecutionException ee){
-			ee.printStackTrace();
-		}catch (CancellationException ce){
-			//if cancelled, tell the user
-			JOptionPane.showMessageDialog(null, "Cancelled! Type the same URL to resume download!");
-			//ce.printStackTrace();
+			/*
+			 * Execute when download has not been cancelled yet. This is important because we don't want to continue download
+			 * when cancel button has been clicked.
+			 */
+			if (!isCancelled()) {
+				exitStatus = process.waitFor();
+			}
+			
+			// Reached end of doInBackground(), remove this value from hash map.
+			downloadList.remove(filename);
+			
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
 		}
+
+		return null;
 	}
-	
-	/** Process the ProgressMonitor
-	 * 
-	 */
+
+	// Invoked on ED thread.
 	@Override
-	protected void process(List<Integer> chunks) {
+	protected void process(List<Integer[]> chunks) {
+		// Update row index if it has been changed.
+		// Only update JTable if the process is not done. If it is, then don't update JTable as it will throw an exception.
 		if (!isDone()) {
-			for (Integer element : chunks) {
-				String format = String.format("Completed : %2d%%", (int)((double)element));
-				monitor.setNote(format);
-				monitor.setProgress(element);
+			// Update the jprogressbar and jlabel to show correct information to user.
+			for (Integer[] element : chunks) {
+				model.setValueAt(element[0], rowListener.getRow(), 1);
+				model.setValueAt(element[1] + "s", rowListener.getRow(), 2);
 			}
 		}
 	}
 	
-	//check if the string is integer
-	protected boolean checkInteger(String s){
-		try { 
-			Integer.parseInt(s); 
-		} catch(NumberFormatException e) { 
-			return false; 
+	// Invoked on the ED thread after doInBackground() completes execution.
+	@Override
+	protected void done() {
+		try {
+			model.removeRow(rowListener.getRow());
+			get();
+			/*
+			 * Done can be called even when the download hasn't finished so determine exit status and display appropriate message.
+			 * Most of the messages were copied from wget manual.
+			 */
+			switch (exitStatus) {
+				case 0:
+					JOptionPane.showMessageDialog(null, filename + " has completed downloading.");
+					break;
+				case 1:
+					JOptionPane.showMessageDialog(null, "Generic error code.");
+					break;
+				case 2:
+					JOptionPane.showMessageDialog(null, "Parse error—for instance, when parsing command-line options, the ‘.wgetrc’ or ‘.netrc’...");
+					break;
+				case 3:
+					JOptionPane.showMessageDialog(null, "File I/O error.");
+					break;
+				case 4:
+					JOptionPane.showMessageDialog(null, "Network failure.");
+					break;
+				case 5:
+					JOptionPane.showMessageDialog(null, "SSL verification failure.");
+					break;
+				case 6:
+					JOptionPane.showMessageDialog(null, "Username/password authentication failure.");
+					break;
+				case 7:
+					JOptionPane.showMessageDialog(null, "Protocol errors.");
+					break;
+				case 8:
+					JOptionPane.showMessageDialog(null, "Server issued an error response.");
+					break;
+			}
+			
+		} catch (CancellationException e) {
+			JOptionPane.showMessageDialog(null, "Process interrupted when trying to download " + filename);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
 		}
-		return true;				
 	}
 }
