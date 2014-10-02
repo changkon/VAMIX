@@ -408,7 +408,7 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 			
 		} else if (e.getSource() == maxVolumeButton) {
 			// 200 is the max volume setting.
-			mediaPlayer.setVolume(200);
+			volumeSlider.setValue(200);
 		} else if (e.getSource() == openButton) {
 			playFile();
 		}

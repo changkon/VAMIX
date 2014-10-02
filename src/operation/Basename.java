@@ -15,7 +15,7 @@ public class Basename {
 	private static String basename;
 	
 	public static String getBasename(String filename) {
-		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "basename " + filename);
+		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "basename \'" + filename + "\'");
 		try {
 			builder.redirectErrorStream(true);
 			Process process = builder.start();

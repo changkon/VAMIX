@@ -10,13 +10,9 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -24,15 +20,21 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingWorker;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import listener.RowListener;
-import operation.Basename;
-import worker.DownloadWorker;
-import component.ProgressRenderer;
 import net.miginfocom.swing.MigLayout;
+import operation.Basename;
+import res.MediaIcon;
+import worker.DownloadWorker;
 
+import component.Playback;
+import component.ProgressRenderer;
+
+@SuppressWarnings("serial")
 public class DownloadPanel extends JPanel implements ActionListener {
 	private static DownloadPanel theInstance = null;
 	
@@ -43,8 +45,8 @@ public class DownloadPanel extends JPanel implements ActionListener {
 	private JLabel downloadTableMessage = new JLabel("Multiple downloads possible!");
 	
 	private JTextField urlTextField = new JTextField();
-	private JButton downloadButton = new JButton();
-	private JButton cancelButton = new JButton();
+	private JButton downloadButton = new JButton(MediaIcon.getIcon(Playback.DOWNLOAD));
+	private JButton cancelButton = new JButton(MediaIcon.getIcon(Playback.STOP));
 	
 	// Override cell editable.
 	private DefaultTableModel model = new DefaultTableModel() {
@@ -74,41 +76,98 @@ public class DownloadPanel extends JPanel implements ActionListener {
 		downloadPanel.setLayout(new MigLayout());
 		downloadTablePanel.setLayout(new MigLayout());
 		
-		message.setText("Enter URL of mp3 to download:");
-		urlTextField.setColumns(30);
-		downloadButton.setText("Download");
-		cancelButton.setText("Cancel");
+		setDownloadPanel();
 		
+		setDownloadTablePanel();
+
+		add(downloadTablePanel, "span, push, grow, wrap");
+		add(downloadPanel, "span, pushx, growx, wrap");
+		
+		addListeners();
+	}
+	
+	private void setDownloadPanel() {
+		message.setText("Enter URL of mp3 to download:");
+		
+		downloadButton.setContentAreaFilled(false);
+		downloadButton.setBorderPainted(false);
+		downloadButton.setFocusPainted(false);
+		downloadButton.setToolTipText("Download audio");
+		
+		cancelButton.setContentAreaFilled(false);
+		cancelButton.setBorderPainted(false);
+		cancelButton.setFocusPainted(false);
+		cancelButton.setToolTipText("Cancel download");
+
 		downloadPanel.add(message);
-		downloadPanel.add(urlTextField);
+		downloadPanel.add(urlTextField, "pushx, growx");
 		downloadPanel.add(downloadButton);
 		downloadPanel.add(cancelButton);
-		
-		downloadTablePanel.add(downloadTableMessage, "wrap");
+	}
+	
+	private void setDownloadTablePanel() {
+		downloadTablePanel.add(downloadTableMessage, "span, wrap");
 		downloadTablePanel.add(scrollPane, "span, push, grow");
 		table.setFillsViewportHeight(true);
 		table.setCellSelectionEnabled(false);
-		
+
 		model.addColumn("Filename");
 		model.addColumn("Progress");
 		model.addColumn("Time Remaining");
 		
+		DefaultTableCellRenderer timeRemainingRenderer = new DefaultTableCellRenderer();
+		timeRemainingRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+		
 		table.getColumnModel().getColumn(1).setCellRenderer(new ProgressRenderer());
+		table.getColumnModel().getColumn(2).setCellRenderer(timeRemainingRenderer);
 		table.setRowSelectionAllowed(true);
-		
-		add(downloadTablePanel, "span, grow, wrap");
-		add(downloadPanel, "wrap");
-		
-		downloadButton.addActionListener(this);
-		cancelButton.addActionListener(this);
 	}
 	
+	private void addListeners() {
+		downloadButton.addActionListener(this);
+		cancelButton.addActionListener(this);
+		
+		downloadButton.getModel().addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+	            ButtonModel model = (ButtonModel)e.getSource();
+	            if (model.isRollover()) {
+	            	downloadButton.setBorderPainted(true);
+	            } else {
+	            	downloadButton.setBorderPainted(false);
+	            }
+			}
+			
+		});
+		
+		cancelButton.getModel().addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				ButtonModel model = (ButtonModel)e.getSource();
+				if (model.isRollover()) {
+					cancelButton.setBorderPainted(true);
+				} else {
+					cancelButton.setBorderPainted(false);
+				}
+			}
+			
+		});
+	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// Checks which button is pressed.
 		if (e.getSource() == downloadButton) {
 			String url = urlTextField.getText();
+			
+			// Check that url is given.
+			if (url.equals("")) {
+				JOptionPane.showMessageDialog(null, "Please input link");
+				return;
+			}
+			
 			String filename = Basename.getBasename(url);
 			String path = currentDir + "/" + filename;
 			Path pathName = Paths.get(path);
@@ -194,7 +253,7 @@ public class DownloadPanel extends JPanel implements ActionListener {
 	private boolean validURLCheck(String url) throws IOException {
 		//check if the URL is vlaid
 		//does not download only returns the URL informaiton
-		ProcessBuilder builder = new ProcessBuilder("/bin/bash","-c","wget --spider -v " + url);
+		ProcessBuilder builder = new ProcessBuilder("/bin/bash","-c","wget --spider -v \'" + url + "\'");
 		Process process = builder.start();		
 		String stdOutput = null;
 		String lastOutput = null;

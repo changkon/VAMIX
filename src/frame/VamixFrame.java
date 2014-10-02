@@ -1,11 +1,14 @@
 package frame;
 
 import java.awt.CardLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -39,6 +42,12 @@ public class VamixFrame extends JFrame implements ActionListener {
 	private JMenu mediaMenu = new JMenu("Media");
 	private JMenuItem openMenuOption = new JMenuItem("Open..");
 	
+	private JMenu toolMenu = new JMenu("Tools");
+	private JMenuItem settingMenuOption = new JMenuItem("Settings");
+	
+	private JMenu helpMenu = new JMenu("Help");
+	private JMenuItem aboutMenuOption = new JMenuItem("About");
+	
 	private MainPanel mainPanel = MainPanel.getInstance();
 	private final String MAIN = "Main";
 	
@@ -69,14 +78,22 @@ public class VamixFrame extends JFrame implements ActionListener {
 		
 		mediaMenu.add(openMenuOption);
 		
+		toolMenu.add(settingMenuOption);
+		
+		helpMenu.add(aboutMenuOption);
+		
 		menuBar.add(panelMenu);
 		menuBar.add(mediaMenu);
+		menuBar.add(toolMenu);
+		menuBar.add(helpMenu);
 	}
 	
 	private void addListeners() {
 		openMenuOption.addActionListener(this);
 		mainPanelOption.addActionListener(this);
 		downloadPanelOption.addActionListener(this);
+		settingMenuOption.addActionListener(this);
+		aboutMenuOption.addActionListener(this);
 		
 		// Makes sure when window closes, it releases the mediaPlayer.
 		addWindowListener(new WindowAdapter() {
@@ -102,6 +119,12 @@ public class VamixFrame extends JFrame implements ActionListener {
 			// Shows download menu panel.
 			CardLayout c = (CardLayout)panels.getLayout();
 			c.show(panels, DOWNLOAD);
+		} else if (e.getSource() == settingMenuOption) {
+			SettingFrame settingFrame = SettingFrame.getInstance();
+			settingFrame.setVisible(true);
+		} else if (e.getSource() == aboutMenuOption) {
+			ReadmeFrame readmeFrame = ReadmeFrame.getInstance();
+			readmeFrame.setVisible(true);
 		}
 	}
 	

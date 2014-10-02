@@ -39,7 +39,7 @@ public class DownloadWorker extends SwingWorker<Void, Integer[]> {
 	protected Void doInBackground() {
 
 		try {
-			ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "wget -c " + url);
+			ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "wget -c \'" + url + "\'");
 			// Note: wget normally outputs log messages onto stderr.
 			builder.redirectErrorStream(true);
 			Process process = builder.start();
@@ -65,7 +65,7 @@ public class DownloadWorker extends SwingWorker<Void, Integer[]> {
 					process.destroy();
 					break;
 				}
-				
+
 				p = percentage.matcher(line);
 				tR = timeRemaining.matcher(line);
 				
