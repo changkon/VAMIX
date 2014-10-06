@@ -2,10 +2,10 @@ package listener;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import component.Playback;
-
 import model.TimeBoundedRangeModel;
 import operation.MediaTimer;
 import panel.MediaPanel;

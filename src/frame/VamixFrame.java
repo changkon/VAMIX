@@ -17,6 +17,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import component.MediaType;
+
 import panel.DownloadPanel;
 import panel.MainPanel;
 import panel.MediaPanel;

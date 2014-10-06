@@ -27,7 +27,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
-import operation.Basename;
+import operation.VamixProcesses;
 import res.MediaIcon;
 import worker.DownloadWorker;
 
@@ -168,7 +168,7 @@ public class DownloadPanel extends JPanel implements ActionListener {
 				return;
 			}
 			
-			String filename = Basename.getBasename(url);
+			String filename = VamixProcesses.getBasename(url);
 			String path = currentDir + "/" + filename;
 			Path pathName = Paths.get(path);
 

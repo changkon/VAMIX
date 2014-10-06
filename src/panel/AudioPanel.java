@@ -25,9 +25,11 @@ import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import operation.MRLFilename;
-import operation.MediaTimer;
+import component.MediaType;
+
 import net.miginfocom.swing.MigLayout;
+import operation.MediaTimer;
+import operation.VamixProcesses;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioReplaceWorker;
 import worker.ExtractAudioWorker;
@@ -175,7 +177,7 @@ public class AudioPanel extends JPanel implements ActionListener {
 					String outputFilename = getOutputAudioFilename();
 
 					if (outputFilename != null) {
-						executeExtract(MRLFilename.getFilename(mediaPlayer.mrl()), outputFilename, startTimeInput.getText(), lengthInput.getText());
+						executeExtract(VamixProcesses.getFilename(mediaPlayer.mrl()), outputFilename, startTimeInput.getText(), lengthInput.getText());
 					}
 
 				}
@@ -196,7 +198,7 @@ public class AudioPanel extends JPanel implements ActionListener {
 							length = "00:" + length;
 						}
 
-						executeExtract(MRLFilename.getFilename(mediaPlayer.mrl()), outputFilename, "00:00:00", length);
+						executeExtract(VamixProcesses.getFilename(mediaPlayer.mrl()), outputFilename, "00:00:00", length);
 
 					}
 				}
@@ -220,7 +222,7 @@ public class AudioPanel extends JPanel implements ActionListener {
 					String videoPath = getOutputVideoFilename();
 					
 					if (videoPath != null) {
-						executeReplace(MRLFilename.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
+						executeReplace(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
 					}
 				}
 			} catch (HeadlessException | IOException e1) {
@@ -245,7 +247,7 @@ public class AudioPanel extends JPanel implements ActionListener {
 					String videoPath = getOutputVideoFilename();
 					
 					if (videoPath != null) {
-						executeOverlay(MRLFilename.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
+						executeOverlay(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
 					}
 				}
 			} catch (HeadlessException | IOException e1) {
@@ -309,17 +311,12 @@ public class AudioPanel extends JPanel implements ActionListener {
 
 			String inputFilename = saveFile.getPath();
 
-			try {
-				String type = Files.probeContentType(Paths.get(inputFilename));
-
-				// Checks that the audio file is an audio file or else it displays an error message.
-				if (!type.equals("audio/mpeg")) {
-					JOptionPane.showMessageDialog(null, type + " does not refer to a valid audio file.");
-					return null;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			// Checks that the audio file is an audio file or else it displays an error message.
+			if (!VamixProcesses.validContentType(MediaType.AUDIO, inputFilename)) {
+				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid audio file.");
+				return null;
 			}
+
 
 			return inputFilename;
 		}
@@ -481,21 +478,20 @@ public class AudioPanel extends JPanel implements ActionListener {
 
 	private boolean validateMedia() throws IOException {
 		if (mediaPlayer.isPlayable()) {
-			String inputFilename = MRLFilename.getFilename(mediaPlayer.mrl());
+			String inputFilename = VamixProcesses.getFilename(mediaPlayer.mrl());
 
 			if (inputFilename == null) {
 				JOptionPane.showMessageDialog(null, "Incorrect file directory");
 				return false;
 			}
 
-			String type = Files.probeContentType(Paths.get(inputFilename));
-
-			if (type.contains("video")) {
+			if (VamixProcesses.validContentType(MediaType.VIDEO, inputFilename)) {
 
 				if (mediaPlayer.getAudioTrackCount() == 0) {
 					JOptionPane.showMessageDialog(null, "No audio track exists in video");
 					return false;
 				}
+				
 			} else {
 				JOptionPane.showMessageDialog(null, "Media is not video file");
 				return false;
@@ -523,9 +519,7 @@ public class AudioPanel extends JPanel implements ActionListener {
 			return false;
 		}
 
-		String type = Files.probeContentType(Paths.get(path));
-
-		if (!type.contains("audio/mpeg")) {
+		if (!VamixProcesses.validContentType(MediaType.AUDIO, path)) {
 			JOptionPane.showMessageDialog(null, path + " is not an audio file");
 			return false;
 		}
