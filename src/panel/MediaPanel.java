@@ -25,8 +25,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.metal.MetalSliderUI;
 
+import operation.VamixProcesses;
+import component.MediaType;
 import component.Playback;
-
 import listener.MediaPlayerListener;
 import model.TimeBoundedRangeModel;
 import net.miginfocom.swing.MigLayout;
@@ -436,32 +437,14 @@ public class MediaPanel extends JPanel implements ActionListener, ChangeListener
 	public void playFile() {
 		JFileChooser chooser = new JFileChooser();
 		int selection = chooser.showOpenDialog(null);
-		boolean media = false;
 		
 		if (selection == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = chooser.getSelectedFile();
-			try {
-				String cmd = "file -b " + selectedFile.toString();
-				ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", cmd);
-				builder.redirectErrorStream(true);
-				Process process = null;
-				process = builder.start();
-				InputStream stdout = process.getInputStream();
-				BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-				String temp = stdoutBuffered.readLine();
-				while(temp != null && !(temp.length() == 0) && !(temp.equals(""))){
-					if(temp.contains("Audio") || temp.contains("MPEG") || temp.contains("video")){
-						media = true;
-					}
-					temp = stdoutBuffered.readLine();
-				}
-			}catch(IOException e1) {
-				e1.printStackTrace();
-			}
-			if(media){	
+
+			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {	
 				mediaPlayer.playMedia(selectedFile.getPath());
 				FilterPanel.getInstance().checkLog(selectedFile.toString());
-			}else{
+			} else {
 				JOptionPane.showMessageDialog(null, "Not a valid media file! Please choose another file.");
 			}
 		}
