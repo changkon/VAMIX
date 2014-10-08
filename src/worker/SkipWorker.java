@@ -4,9 +4,10 @@ import java.util.List;
 
 import javax.swing.SwingWorker;
 
+import operation.MediaTimer;
 import component.Playback;
-
 import panel.MediaPanel;
+import panel.PlaybackPanel;
 import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
@@ -20,16 +21,19 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class SkipWorker extends SwingWorker<Void, Integer> {
 	private Playback mode;
+	private EmbeddedMediaPlayer mediaPlayer;
+	private PlaybackPanel playbackPanel;
+	private MediaSetting mediaSetting;
 	
-	public SkipWorker(Playback mode) {
+	public SkipWorker(Playback mode, EmbeddedMediaPlayer mediaPlayer, PlaybackPanel playbackPanel) {
 		this.mode = mode;
+		this.mediaPlayer = mediaPlayer;
+		this.playbackPanel = playbackPanel;
+		mediaSetting = MediaSetting.getInstance();
 	}
 	
 	@Override
 	protected Void doInBackground() throws Exception {
-		EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayer();
-		MediaSetting mediaSetting = MediaSetting.getInstance();
-		
 		while(!isCancelled()) {
 			switch(mode) {
 				case FASTFORWARD:
@@ -51,11 +55,8 @@ public class SkipWorker extends SwingWorker<Void, Integer> {
 	protected void process(List<Integer> chunks){
 		
 		for(Integer i: chunks){
-			if(i == 0){
-				MediaPanel.getInstance().checkMediaState();
-			}else{
-				MediaPanel.getInstance().timeSlider.setValue(i);
-			}
+			playbackPanel.timeSlider.setValue(i);
+			playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(i.longValue()));
 		}
 	}
 }

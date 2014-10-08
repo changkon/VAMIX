@@ -2,16 +2,16 @@ package listener;
 
 import java.lang.reflect.InvocationTargetException;
 
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import component.Playback;
 import model.TimeBoundedRangeModel;
 import operation.MediaTimer;
-import panel.MediaPanel;
+import panel.PlaybackPanel;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
+
+import component.Playback;
 
 /**
  * Updates media frame when media frame state has changed. Because this is not in the EDT, it must call on invokeAndWait
@@ -20,10 +20,10 @@ import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
  */
 
 public class MediaPlayerListener extends MediaPlayerEventAdapter {
-	private MediaPanel mediaPanel;
+	private PlaybackPanel playbackPanel;
 	
-	public MediaPlayerListener(MediaPanel mediaPanel) {
-		this.mediaPanel = mediaPanel;
+	public MediaPlayerListener(PlaybackPanel playbackPanel) {
+		this.playbackPanel = playbackPanel;
 	}
 	
 	// executed synchronously on the AWT event dispatching thread. Call is blocked until all processing AWT events have been
@@ -38,11 +38,11 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					mediaPanel.finishTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getLength()));
-					mediaPanel.timeSlider.setMinimum(0);
-					mediaPanel.timeSlider.setMaximum((int)mediaPlayer.getLength()); // only accepts int.
-					mediaPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
-					mediaPanel.muteButton.setIcon(MediaIcon.getIcon(Playback.UNMUTE));
+					playbackPanel.finishTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getLength()));
+					playbackPanel.timeSlider.setMinimum(0);
+					playbackPanel.timeSlider.setMaximum((int)mediaPlayer.getLength()); // only accepts int.
+					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
+					playbackPanel.muteButton.setIcon(MediaIcon.getIcon(Playback.UNMUTE));
 					mediaPlayer.setTime(0);
 					mediaPlayer.mute(false);
 				}
@@ -56,13 +56,13 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 	@Override
 	public void paused(MediaPlayer mediaPlayer) {
 		super.paused(mediaPlayer);
-		
+
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 
 				@Override
 				public void run() {
-					mediaPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
 				}
 				
 			});
@@ -80,7 +80,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					mediaPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PAUSE));
+					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PAUSE));
 				}
 				
 			});
@@ -100,10 +100,10 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					mediaPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
-					mediaPanel.startTimeLabel.setText(MediaPanel.initialTimeDisplay);
-					mediaPanel.finishTimeLabel.setText(MediaPanel.initialTimeDisplay);
-					mediaPanel.timeSlider.setValue(0);
+					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+					playbackPanel.startTimeLabel.setText(playbackPanel.initialTimeDisplay);
+					playbackPanel.finishTimeLabel.setText(playbackPanel.initialTimeDisplay);
+					playbackPanel.timeSlider.setValue(0);
 				}
 				
 			});
@@ -123,10 +123,10 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					mediaPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
-					mediaPanel.startTimeLabel.setText(MediaPanel.initialTimeDisplay);
-					mediaPanel.finishTimeLabel.setText(MediaPanel.initialTimeDisplay);
-					mediaPanel.timeSlider.setValue(0);
+					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+					playbackPanel.startTimeLabel.setText(playbackPanel.initialTimeDisplay);
+					playbackPanel.finishTimeLabel.setText(playbackPanel.initialTimeDisplay);
+					playbackPanel.timeSlider.setValue(0);
 				}
 				
 			});
@@ -144,11 +144,11 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					mediaPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(newTime));
+					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(newTime));
 					
 					// Turn "off" the change listener. So that when it calls statechanged, it does set time because the boolean is set to false.
-					((TimeBoundedRangeModel)mediaPanel.timeSlider.getModel()).setActive(false);
-					mediaPanel.timeSlider.setValue((int)newTime); // only accepts int.
+					((TimeBoundedRangeModel)playbackPanel.timeSlider.getModel()).setActive(false);
+					playbackPanel.timeSlider.setValue((int)newTime); // only accepts int.
 				}
 				
 			});

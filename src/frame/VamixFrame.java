@@ -18,10 +18,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import component.MediaType;
-
 import panel.DownloadPanel;
 import panel.MainPanel;
 import panel.MediaPanel;
+import panel.MediaPlayerComponentPanel;
+import panel.PlaybackPanel;
 
 /**
  * 
@@ -55,6 +56,9 @@ public class VamixFrame extends JFrame implements ActionListener {
 	
 	private DownloadPanel downloadPanel = DownloadPanel.getInstance();
 	private final String DOWNLOAD = "Download";
+	
+	private MediaPlayerComponentPanel mediaPlayerComponentPanel = MediaPanel.getInstance().getMediaPlayerComponentPanel();
+	private PlaybackPanel playbackPanel = MediaPanel.getInstance().getPlaybackPanel();
 	
 	public VamixFrame() {
 		super("VAMIX");
@@ -103,7 +107,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				super.windowClosing(e);
-				MediaPanel.getInstance().getMediaPlayer().release();
+				mediaPlayerComponentPanel.getMediaPlayer().release();
 			}
 			
 		});
@@ -112,7 +116,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == openMenuOption) {
-			MediaPanel.getInstance().playFile();
+			playbackPanel.playFile();
 		} else if (e.getSource() == mainPanelOption) {
 			// Shows main menu panel.
 			CardLayout c = (CardLayout)panels.getLayout();

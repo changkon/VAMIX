@@ -13,6 +13,7 @@ import panel.MediaPanel;
 import res.FilterColor;
 import res.FilterFont;
 import setting.MediaSetting;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 /**
  * 
@@ -96,8 +97,11 @@ public class FilterPreviewWorker extends SwingWorker<Void, Void> {
 			filterOpeningSceneLen = filterOpeningLength + 2;
 			command = new StringBuilder("avplay -i \'" + inputFilename + "\' -t "+ filterOpeningSceneLen +" -vf ");
 		}else if(openingORclosing.equals("Closing")){
+			// Get the mediaPlayer from the mediaPanel.
+			EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
+			
 			//If closing, play x number of seconds from the end
-			filterClosingSceneLen = (int) (MediaPanel.getInstance().mediaPlayer.getLength() - 1000*filterClosingLength - 1000*2);
+			filterClosingSceneLen = (int) (mediaPlayer.getLength() - 1000*filterClosingLength - 1000*2);
 
 			String filterClosingSceneString = MediaTimer.getFormattedTime(filterClosingSceneLen);
 			if(filterClosingSceneString.length() == 5){

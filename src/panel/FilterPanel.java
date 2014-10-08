@@ -52,7 +52,7 @@ import worker.FilterSaveWorker;
 @SuppressWarnings("serial")
 public class FilterPanel extends JPanel implements ActionListener {
 	private static FilterPanel theInstance = null;
-	private EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayer();
+	private EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 	private TitledBorder title;
 
 	private static final int MAXWORDS = 20;

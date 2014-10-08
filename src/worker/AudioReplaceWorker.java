@@ -42,7 +42,6 @@ public class AudioReplaceWorker extends SwingWorker<Void, Integer> {
 		InputStream stdout = process.getInputStream();
 		BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
 		
-		@SuppressWarnings("unused")
 		String line = "";
 		
 		//run the process until the monitor is cancelled

@@ -38,7 +38,7 @@ import worker.OverlayWorker;
 @SuppressWarnings("serial")
 public class AudioPanel extends JPanel implements ActionListener {
 	private static AudioPanel theInstance = null;
-	private EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayer();
+	private EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 	private TitledBorder title;
 
 	private JPanel audioExtractionPanel = new JPanel(new MigLayout());
@@ -54,8 +54,6 @@ public class AudioPanel extends JPanel implements ActionListener {
 	private JTextField lengthInput = new JTextField(10);
 	private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	private JButton extractButton = new JButton("Extract");
-
-	private JLabel orLabel = new JLabel("OR");
 
 	private JButton extractFullButton = new JButton("Extract entire Video");
 
@@ -100,6 +98,8 @@ public class AudioPanel extends JPanel implements ActionListener {
 	private void setAudioExtractionPanel() {
 		Font font = extractionLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f); // Default is 12.
 
+		JLabel orLabel = new JLabel("OR");
+		
 		extractionLabel.setFont(font);
 
 		extractButton.setForeground(Color.WHITE);
