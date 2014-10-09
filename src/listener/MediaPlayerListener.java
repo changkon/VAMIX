@@ -38,12 +38,13 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
+					System.out.println(mediaPlayer.getTime());
 					playbackPanel.finishTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getLength()));
 					playbackPanel.timeSlider.setMinimum(0);
 					playbackPanel.timeSlider.setMaximum((int)mediaPlayer.getLength()); // only accepts int.
 					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
 					playbackPanel.muteButton.setIcon(MediaIcon.getIcon(Playback.UNMUTE));
-					mediaPlayer.setTime(0);
+//					mediaPlayer.setTime(0);
 					mediaPlayer.mute(false);
 				}
 				
@@ -73,8 +74,9 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 	@Override
 	public void playing(MediaPlayer mediaPlayer) {
+
 		super.playing(mediaPlayer);
-		
+
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 
@@ -101,8 +103,8 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 				@Override
 				public void run() {
 					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
-					playbackPanel.startTimeLabel.setText(playbackPanel.initialTimeDisplay);
-					playbackPanel.finishTimeLabel.setText(playbackPanel.initialTimeDisplay);
+					playbackPanel.startTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
+					playbackPanel.finishTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
 					playbackPanel.timeSlider.setValue(0);
 				}
 				
@@ -124,8 +126,8 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 				@Override
 				public void run() {
 					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
-					playbackPanel.startTimeLabel.setText(playbackPanel.initialTimeDisplay);
-					playbackPanel.finishTimeLabel.setText(playbackPanel.initialTimeDisplay);
+					playbackPanel.startTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
+					playbackPanel.finishTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
 					playbackPanel.timeSlider.setValue(0);
 				}
 				

@@ -21,6 +21,7 @@ import model.TimeBoundedRangeModel;
 import net.miginfocom.swing.MigLayout;
 import operation.VamixProcesses;
 import res.MediaIcon;
+import uk.co.caprica.vlcj.player.MediaPlayerLatch;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.SkipWorker;
 import component.MediaType;
@@ -292,8 +293,8 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		if (selection == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = chooser.getSelectedFile();
 
-			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {	
-				mediaPlayer.playMedia(selectedFile.getPath());
+			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {
+				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
 				FilterPanel.getInstance().checkLog(selectedFile.toString());
 			} else {
 				JOptionPane.showMessageDialog(null, "Not a valid media file! Please choose another file.");
@@ -322,7 +323,6 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			}
 		} else if (e.getSource() == stopButton) {
 			mediaPlayer.stop();
-			timeSlider.setValue(0);
 		} else if (e.getSource() == fastforwardButton) {
 			// time in milliseconds
 			fastforwardButton.setSelected(true);
