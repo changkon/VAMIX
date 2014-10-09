@@ -1,5 +1,7 @@
 package panel;
 
+import java.awt.Color;
+
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -28,7 +30,7 @@ public class MediaPanel extends JPanel {
 		setLayout(new MigLayout());
 		mediaPlayerComponentPanel = new MediaPlayerComponentPanel();
 		playbackPanel = new PlaybackPanel(mediaPlayerComponentPanel.getMediaPlayer());
-		
+
 		add(mediaPlayerComponentPanel, "push, grow, wrap");
 		add(playbackPanel, "pushx, growx");
 	}

@@ -1,9 +1,12 @@
 package frame;
 
+import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -17,6 +20,8 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import operation.MediaTimer;
@@ -27,6 +32,7 @@ import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.embedded.DefaultFullScreenStrategy;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.FullScreenStrategy;
+
 import component.MediaCountFSM;
 
 @SuppressWarnings("serial")
@@ -36,6 +42,8 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 	private PlaybackPanel playbackPanel;
 
 	private JLayeredPane layeredPane;
+	
+	private MediaPlayerFactory mediaPlayerFactory;
 	
 	private EmbeddedMediaPlayer mediaPanelMediaPlayer;
 	private EmbeddedMediaPlayer mediaPlayer;
@@ -58,13 +66,20 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 
 		// Create a fullscreen embedded media player using mediaPlayerFactory and FullScreenFactory.
 		canvas = new Canvas();
+		
+		// Remove border.
 		setUndecorated(true);
 
-		MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory();
+		mediaPlayerFactory = new MediaPlayerFactory();
 		FullScreenStrategy fullScreenStrategy = new DefaultFullScreenStrategy(this);
 		mediaPlayer = mediaPlayerFactory.newEmbeddedMediaPlayer(fullScreenStrategy);
 		mediaPlayer.setVideoSurface(mediaPlayerFactory.newVideoSurface(canvas));
 
+		JPanel canvasPanel = new JPanel(new BorderLayout());
+		// Default background.
+		canvasPanel.setBackground(Color.BLACK);
+		canvasPanel.add(canvas, BorderLayout.CENTER);
+		
 		playbackPanel = new PlaybackPanel(mediaPlayer);
 
 		// We don't want to feature to open media files in fullscreen mode.
@@ -78,24 +93,24 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 
 		// Set sizes of panel through absolute values. Determined by screen size of monitor.
 		Dimension screenSize = new Dimension(g.getDisplayMode().getWidth(), g.getDisplayMode().getHeight());
-
-		canvas.setBounds(0, 0, screenSize.width, screenSize.height);
-		playbackPanel.setBounds(0, g.getDisplayMode().getHeight() - 100, g.getDisplayMode().getWidth(), 100);
+		Dimension playbackSize = MediaPanel.getInstance().getPlaybackPanel().getSize();
+		
+		canvasPanel.setBounds(0, 0, screenSize.width, screenSize.height);
+		playbackPanel.setBounds(0, g.getDisplayMode().getHeight() - playbackSize.height, g.getDisplayMode().getWidth(), playbackSize.height);
 		
 		// smaller the position number, the higher the component within its depth. The higher number is at the front.
 		// use jlayeredpane to get layering effect.
 		layeredPane = new JLayeredPane();
 
-		layeredPane.add(canvas, new Integer(0));
+		layeredPane.add(canvasPanel, new Integer(0));
 		layeredPane.add(playbackPanel, new Integer(1));
 		
 		add(layeredPane);
-		setFullScreen();
 
 		addListeners();
 	}
 
-	private void setFullScreen() {		
+	public void setFullScreen() {		
 		if (!mediaPanelMediaPlayer.isPlayable()) {
 			JOptionPane.showMessageDialog(null, "Please parse media");
 			return;
@@ -116,17 +131,9 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 		// Play the media with the correct time and volume.
 		mediaPlayer.playMedia(mediaPath, ":start-time=" + mediaPanelMediaPlayer.getTime() / 1000);
 		playbackPanel.volumeSlider.setValue(mediaPanelMediaPlayer.getVolume());
-		
-		// If the mediaPanel media player is not playing then pause on the full screen media player.
-		if (!mediaPanelMediaPlayer.isPlaying()) {
-			mediaPlayer.pause();
-		}
-		
-		System.out.println(MediaPanel.getInstance().getPlaybackPanel().timeSlider.getHeight());
-		System.out.println(playbackPanel.timeSlider.getHeight());
 	}
 
-	private void exitFullScreen() {
+	public void exitFullScreen() {
 		vamixFrame.setVisible(true);
 		
 		// Sets the correct time for the mediaPanel media player when exiting full screen and volume.
@@ -138,7 +145,7 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 		if (mediaPlayer.isPlaying()) {
 			mediaPanelMediaPlayer.play();
 		}
-		
+		mediaPlayerFactory.release();
 		mediaPlayer.release();
 		dispose();
 	}

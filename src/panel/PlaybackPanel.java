@@ -1,6 +1,9 @@
 package panel;
 
 import java.awt.Color;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -8,10 +11,12 @@ import java.io.File;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.metal.MetalSliderUI;
@@ -21,11 +26,12 @@ import model.TimeBoundedRangeModel;
 import net.miginfocom.swing.MigLayout;
 import operation.VamixProcesses;
 import res.MediaIcon;
-import uk.co.caprica.vlcj.player.MediaPlayerLatch;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.SkipWorker;
 import component.MediaType;
 import component.Playback;
+import frame.FullScreenMediaPlayer;
+import frame.VamixFrame;
 
 @SuppressWarnings("serial")
 public class PlaybackPanel extends JPanel implements ActionListener, ChangeListener {
@@ -47,6 +53,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 	public JButton muteButton = new JButton(MediaIcon.getIcon(Playback.UNMUTE));
 	public JButton maxVolumeButton = new JButton(MediaIcon.getIcon(Playback.MAXVOLUME));
 	public JButton openButton = new JButton(MediaIcon.getIcon(Playback.OPEN));
+	public JButton fullScreenButton = new JButton(MediaIcon.getIcon(Playback.FULLSCREEN));
 	
 	public JLabel startTimeLabel = new JLabel(initialTimeDisplay); // Initial labels
 	public JLabel finishTimeLabel = new JLabel(initialTimeDisplay);
@@ -78,7 +85,6 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 	private void setTimePanel() {
 		// Initially set value to 0
 		timeSlider.setValue(0);
-		timeSlider.setBackground(Color.yellow);
 		
 		timeSlider.setToolTipText("Time Bar. Shows elapsed and total time");
 		timePanel.add(startTimeLabel);
@@ -140,12 +146,21 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		openButton.setFocusPainted(false);
 		openButton.setContentAreaFilled(false);
 
-		buttonPanel.add(openButton, "align right, pushx");
+		buttonPanel.add(openButton, "split 2, align right, pushx");
+		
+		fullScreenButton.setToolTipText("Toggle fullscreen");
+		fullScreenButton.setBorderPainted(false);
+		fullScreenButton.setFocusPainted(false);
+		fullScreenButton.setContentAreaFilled(false);
+		
+		buttonPanel.add(fullScreenButton, "pushx");
+		
+
 	}
 	
 	private void setPlaybackPanel() {
 		playbackPanel.add(timePanel, "pushx, growx, wrap 0px");
-		playbackPanel.add(buttonPanel, "pushx, growx");
+		playbackPanel.add(buttonPanel, "pushx, growx, wrap 0px");
 	}
 	
 	private void addListeners() {
@@ -160,6 +175,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		muteButton.addActionListener(this);
 		maxVolumeButton.addActionListener(this);
 		openButton.addActionListener(this);
+		fullScreenButton.addActionListener(this);
 		
 		// Jslider change listeners
 		volumeSlider.addChangeListener(this);
@@ -249,7 +265,18 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 	            }
 	        }
 	    });
-		
+
+		fullScreenButton.getModel().addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            ButtonModel model = (ButtonModel) e.getSource();
+	            if (model.isRollover()) {
+	            	fullScreenButton.setBorderPainted(true);
+	            } else {
+	            	fullScreenButton.setBorderPainted(false);
+	            }
+	        }
+	    });
 		
 		//http://stackoverflow.com/questions/518471/jslider-question-position-after-leftclick
 		//click to change time on the time slider solution by ninesided on Feb 6, '09.
@@ -387,6 +414,18 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			volumeSlider.setValue(200);
 		} else if (e.getSource() == openButton) {
 			playFile();
+		} else if (e.getSource() == fullScreenButton) {
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice g = ge.getDefaultScreenDevice();
+			JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(this);
+			
+			if (g.getFullScreenWindow() == null) {
+				FullScreenMediaPlayer fullScreen = new FullScreenMediaPlayer(frame);
+				fullScreen.setFullScreen();
+			} else {
+				FullScreenMediaPlayer fullScreen = (FullScreenMediaPlayer)frame;
+				fullScreen.exitFullScreen();
+			}	
 		}
 	}
 	

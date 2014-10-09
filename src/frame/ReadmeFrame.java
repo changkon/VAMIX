@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+@SuppressWarnings("serial")
 public class ReadmeFrame extends JFrame {
 	private static ReadmeFrame theInstance = null;
 	private JTextArea text = new JTextArea();

@@ -5,16 +5,14 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 import setting.MediaSetting;
 
+@SuppressWarnings("serial")
 public class SettingFrame extends JFrame implements ActionListener {
 	private static SettingFrame theInstance = null;
 	private MediaSetting mediaSetting;

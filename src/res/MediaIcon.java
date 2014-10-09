@@ -30,6 +30,7 @@ public class MediaIcon {
 	private static ImageIcon maxVolume = new ImageIcon(path + "/res/maxvolume.png");
 	private static ImageIcon open = new ImageIcon(path + "/res/open.png");
 	private static ImageIcon download = new ImageIcon(path + "/res/download.png");
+	private static ImageIcon fullscreen = new ImageIcon(path + "/res/fullscreen.png");
 	
 	public static Icon getIcon(Playback option) {
 		ImageIcon icon = null;
@@ -64,6 +65,9 @@ public class MediaIcon {
 				break;
 			case DOWNLOAD:
 				icon = download;
+				break;
+			case FULLSCREEN:
+				icon = fullscreen;
 				break;
 		}
 		
