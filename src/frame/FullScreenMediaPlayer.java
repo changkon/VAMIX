@@ -1,14 +1,11 @@
 package frame;
 
-import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyAdapter;
@@ -22,7 +19,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
-import component.MediaCountFSM;
 import operation.MediaTimer;
 import operation.VamixProcesses;
 import panel.MediaPanel;
@@ -31,7 +27,9 @@ import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.embedded.DefaultFullScreenStrategy;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.FullScreenStrategy;
+import component.MediaCountFSM;
 
+@SuppressWarnings("serial")
 public class FullScreenMediaPlayer extends JFrame implements ActionListener, ComponentListener {
 	private JFrame vamixFrame;
 
@@ -69,6 +67,9 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 
 		playbackPanel = new PlaybackPanel(mediaPlayer);
 
+		// We don't want to feature to open media files in fullscreen mode.
+		playbackPanel.openButton.setVisible(false);
+		
 		// Initially make it invisible
 		playbackPanel.setVisible(false);
 
@@ -89,7 +90,6 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 		layeredPane.add(playbackPanel, new Integer(1));
 		
 		add(layeredPane);
-
 		setFullScreen();
 
 		addListeners();
@@ -113,26 +113,27 @@ public class FullScreenMediaPlayer extends JFrame implements ActionListener, Com
 		// play media file.
 		mediaPlayer.setFullScreen(true);
 		
-		// Parses the media but it isn't playing yet.
-		mediaPlayer.playMedia(mediaPath);
-
-//		playbackPanel.timeSlider.setValue((int)mediaPanelMediaPlayer.getTime());
+		// Play the media with the correct time and volume.
+		mediaPlayer.playMedia(mediaPath, ":start-time=" + mediaPanelMediaPlayer.getTime() / 1000);
+		playbackPanel.volumeSlider.setValue(mediaPanelMediaPlayer.getVolume());
 		
 		// If the mediaPanel media player is not playing then pause on the full screen media player.
 		if (!mediaPanelMediaPlayer.isPlaying()) {
 			mediaPlayer.pause();
 		}
 		
-		
+		System.out.println(MediaPanel.getInstance().getPlaybackPanel().timeSlider.getHeight());
+		System.out.println(playbackPanel.timeSlider.getHeight());
 	}
 
 	private void exitFullScreen() {
 		vamixFrame.setVisible(true);
 		
-		// Sets the correct time for the mediaPanel media player when exiting full screen.
+		// Sets the correct time for the mediaPanel media player when exiting full screen and volume.
 		PlaybackPanel mediaPanelPlayback = MediaPanel.getInstance().getPlaybackPanel();
 		mediaPanelPlayback.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
 		mediaPanelPlayback.timeSlider.setValue((int)mediaPlayer.getTime());
+		mediaPanelPlayback.volumeSlider.setValue(mediaPlayer.getVolume());
 		
 		if (mediaPlayer.isPlaying()) {
 			mediaPanelMediaPlayer.play();

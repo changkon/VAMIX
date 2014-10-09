@@ -130,6 +130,10 @@ public class VamixFrame extends JFrame implements ActionListener {
 		}
 	}
 	
+	public Dimension getPlaybackPanelSize() {
+		return playbackPanel.getSize();
+	}
+	
 	/** Initialise
 	 * 
 	 * @param args

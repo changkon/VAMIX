@@ -78,6 +78,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 	private void setTimePanel() {
 		// Initially set value to 0
 		timeSlider.setValue(0);
+		timeSlider.setBackground(Color.yellow);
 		
 		timeSlider.setToolTipText("Time Bar. Shows elapsed and total time");
 		timePanel.add(startTimeLabel);
@@ -294,6 +295,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			File selectedFile = chooser.getSelectedFile();
 
 			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {
+				// Start files from the start.
 				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
 				FilterPanel.getInstance().checkLog(selectedFile.toString());
 			} else {

@@ -38,13 +38,17 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					System.out.println(mediaPlayer.getTime());
 					playbackPanel.finishTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getLength()));
+					
+					/*
+					 * When setting the minimum value, it calls its change listeners. As our timeslider forcibly changes
+					 * time, we want to disable setting time to zero in case we need to start from a different time.
+					 */
+					((TimeBoundedRangeModel)playbackPanel.timeSlider.getModel()).setActive(false);
 					playbackPanel.timeSlider.setMinimum(0);
 					playbackPanel.timeSlider.setMaximum((int)mediaPlayer.getLength()); // only accepts int.
 					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
 					playbackPanel.muteButton.setIcon(MediaIcon.getIcon(Playback.UNMUTE));
-//					mediaPlayer.setTime(0);
 					mediaPlayer.mute(false);
 				}
 				
