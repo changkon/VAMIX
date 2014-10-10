@@ -9,7 +9,7 @@ import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
-import frame.FullScreenMediaPlayer;
+import frame.FullScreenMediaPlayerFrame;
 
 @SuppressWarnings("serial")
 public class MainPanel extends JPanel {
@@ -42,7 +42,7 @@ public class MainPanel extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				JFrame vamixFrame = (JFrame)SwingUtilities.getWindowAncestor(MediaPanel.getInstance());
 				if (e.getClickCount() == 2) {
-					FullScreenMediaPlayer fullScreen = new FullScreenMediaPlayer(vamixFrame);
+					FullScreenMediaPlayerFrame fullScreen = new FullScreenMediaPlayerFrame(vamixFrame);
 					fullScreen.setFullScreen();
 				}
 			}

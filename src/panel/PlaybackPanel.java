@@ -1,9 +1,7 @@
 package panel;
 
-import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -28,10 +26,18 @@ import operation.VamixProcesses;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.SkipWorker;
+
 import component.MediaType;
 import component.Playback;
-import frame.FullScreenMediaPlayer;
-import frame.VamixFrame;
+
+import frame.FullScreenMediaPlayerFrame;
+
+/**
+ * The panel responsible to control playback for mediaPlayer. Because it controls some mediaPlayer, it must be linked to some mediaPlayer during constructor. </br>
+ * {@link panel.MediaPlayerComponentPanel}
+ * @author changkon
+ *
+ */
 
 @SuppressWarnings("serial")
 public class PlaybackPanel extends JPanel implements ActionListener, ChangeListener {
@@ -420,10 +426,10 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(this);
 			
 			if (g.getFullScreenWindow() == null) {
-				FullScreenMediaPlayer fullScreen = new FullScreenMediaPlayer(frame);
+				FullScreenMediaPlayerFrame fullScreen = new FullScreenMediaPlayerFrame(frame);
 				fullScreen.setFullScreen();
 			} else {
-				FullScreenMediaPlayer fullScreen = (FullScreenMediaPlayer)frame;
+				FullScreenMediaPlayerFrame fullScreen = (FullScreenMediaPlayerFrame)frame;
 				fullScreen.exitFullScreen();
 			}	
 		}

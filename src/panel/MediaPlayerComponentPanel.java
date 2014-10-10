@@ -1,12 +1,17 @@
 package panel;
 
-import java.awt.Dimension;
+import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+
+/**
+ * Panel containing the mediaPlayer and mediaPlayerComponent. It uses BorderLayout so that it is automatically resized.
+ * @author changkon
+ *
+ */
 
 @SuppressWarnings("serial")
 public class MediaPlayerComponentPanel extends JPanel {
@@ -14,16 +19,12 @@ public class MediaPlayerComponentPanel extends JPanel {
 	private EmbeddedMediaPlayer mediaPlayer;
 	
 	public MediaPlayerComponentPanel() {
-		setLayout(new MigLayout());
+		setLayout(new BorderLayout());
 		
 		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 		mediaPlayer = mediaPlayerComponent.getMediaPlayer();
 		
-		add(mediaPlayerComponent, "push, grow");
-	}
-	
-	public void resizeMediaPlayerComponent(Dimension d) {
-		mediaPlayerComponent.setPreferredSize(d);
+		add(mediaPlayerComponent, BorderLayout.CENTER);
 	}
 	
 	public EmbeddedMediaPlayerComponent getMediaPlayerComponent() {

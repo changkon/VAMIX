@@ -59,7 +59,7 @@ public class ReadmeFrame extends JFrame {
 				text.append(line + "\n");
 			}
 			
-			
+			buffer.close();
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

@@ -1,7 +1,5 @@
 package panel;
 
-import java.awt.Color;
-
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;

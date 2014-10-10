@@ -6,6 +6,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+@SuppressWarnings("serial")
 public class ProgressRenderer extends JProgressBar implements TableCellRenderer {
 
 	@Override
