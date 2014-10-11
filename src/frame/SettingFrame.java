@@ -19,8 +19,8 @@ public class SettingFrame extends JFrame implements ActionListener {
 	
 	private JPanel buttonPanel = new JPanel();
 	
-	private JButton saveButton = new JButton("Save");
-	private JButton cancelButton = new JButton("Cancel");
+	private JButton applyButton = new JButton("Apply");
+	private JButton closeButton = new JButton("Close");
 	
 	public static SettingFrame getInstance() {
 		if (theInstance == null) {
@@ -37,27 +37,28 @@ public class SettingFrame extends JFrame implements ActionListener {
 		setResizable(false);
 		mediaSetting = MediaSetting.getInstance();
 		
-		add(buttonPanel, "dock south");
 		
+		add(buttonPanel, "push, grow");
+		buttonPanel.setBackground(Color.BLUE);
 		setButtonPanel();
 		addListeners();
 	}
 	
 	private void setButtonPanel() {
-		saveButton.setBackground(Color.RED);
+		applyButton.setBackground(Color.RED);
 		
-		buttonPanel.add(cancelButton, "pushx, growx");
-		buttonPanel.add(saveButton);
+		buttonPanel.add(applyButton, "pushx, growx, align right");
+		buttonPanel.add(closeButton);
 	}
 	
 	private void addListeners() {
-		saveButton.addActionListener(this);
-		cancelButton.addActionListener(this);
+		applyButton.addActionListener(this);
+		closeButton.addActionListener(this);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == saveButton) {
+		if (e.getSource() == applyButton) {
 			
 		} else {
 			dispose();

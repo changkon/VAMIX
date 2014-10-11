@@ -25,8 +25,6 @@ import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import component.MediaType;
-
 import net.miginfocom.swing.MigLayout;
 import operation.MediaTimer;
 import operation.VamixProcesses;
@@ -35,9 +33,18 @@ import worker.AudioReplaceWorker;
 import worker.ExtractAudioWorker;
 import worker.OverlayWorker;
 
+import component.MediaType;
+
+/**
+ * First page of audio panel. Contains extraction, replace and overlay features.
+ * @author changkon
+ *
+ */
+
 @SuppressWarnings("serial")
-public class AudioPanel extends JPanel implements ActionListener {
-	private static AudioPanel theInstance = null;
+public class AudioFirstPagePanel extends JPanel implements ActionListener {
+	private static AudioFirstPagePanel theInstance = null;
+	
 	private EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 	private TitledBorder title;
 
@@ -69,17 +76,16 @@ public class AudioPanel extends JPanel implements ActionListener {
 	private JTextField selectedAudioOverlayFileTextField = new JTextField();
 	private JButton audioOverlayButton = new JButton("Overlay");
 
-	public static AudioPanel getInstance() {
+	public static AudioFirstPagePanel getInstance() {
 		if (theInstance == null) {
-			theInstance = new AudioPanel();
+			theInstance = new AudioFirstPagePanel();
 		}
 		return theInstance;
 	}
 	
-	private AudioPanel() {
+	private AudioFirstPagePanel() {
 		setLayout(new MigLayout());
 
-		setPreferredSize(new Dimension(812, 300));
 		title = BorderFactory.createTitledBorder("Audio");
 		setBorder(title);
 

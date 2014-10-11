@@ -1,5 +1,6 @@
 package panel;
 
+import java.awt.CardLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -16,7 +17,14 @@ public class MainPanel extends JPanel {
 	private static MainPanel theInstance = null;
 	
 	private MediaPanel mediaPanel = MediaPanel.getInstance();
-	private AudioPanel audioPanel = AudioPanel.getInstance();
+	
+	private JPanel audioPanels = new JPanel(new CardLayout());
+	private JPanel videoPanels = new JPanel(new CardLayout());
+	
+	// AudioPanels
+	private AudioFirstPagePanel audioFirstPagePanel = AudioFirstPagePanel.getInstance();
+	private AudioSecondPagePanel audioSecondPagePanel = AudioSecondPagePanel.getInstance();
+	
 	private FilterPanel filterPanel = FilterPanel.getInstance();
 	
 	public static MainPanel getInstance() {
@@ -29,9 +37,12 @@ public class MainPanel extends JPanel {
 	private MainPanel() {
 		setLayout(new MigLayout());
 		
+		setVideoPanels();
+		setAudioPanels();
+		
 		add(mediaPanel, "push, grow");
-		add(filterPanel, "span 1 2, pushy, growy, wrap");
-		add(audioPanel);
+		add(videoPanels, "span 1 2, pushy, growy, wrap");
+		add(audioPanels, "pushx, growx");
 		
 		EmbeddedMediaPlayerComponent mediaPlayerComponent = mediaPanel.getMediaPlayerComponentPanel().getMediaPlayerComponent();
 		
@@ -48,5 +59,14 @@ public class MainPanel extends JPanel {
 			}
 			
 		});
+	}
+	
+	private void setVideoPanels() {
+		videoPanels.add(filterPanel);
+	}
+	
+	private void setAudioPanels() {
+		audioPanels.add(audioFirstPagePanel);
+		audioPanels.add(audioSecondPagePanel);
 	}
 }

@@ -21,9 +21,11 @@ import component.Playback;
 
 public class MediaPlayerListener extends MediaPlayerEventAdapter {
 	private PlaybackPanel playbackPanel;
+	private MediaIcon mediaIcon;
 	
 	public MediaPlayerListener(PlaybackPanel playbackPanel) {
 		this.playbackPanel = playbackPanel;
+		mediaIcon = playbackPanel.mediaIcon;
 	}
 	
 	// executed synchronously on the AWT event dispatching thread. Call is blocked until all processing AWT events have been
@@ -48,7 +50,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 					playbackPanel.timeSlider.setMinimum(0);
 					playbackPanel.timeSlider.setMaximum((int)mediaPlayer.getLength()); // only accepts int.
 					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
-					playbackPanel.muteButton.setIcon(MediaIcon.getIcon(Playback.UNMUTE));
+					playbackPanel.muteButton.setIcon(mediaIcon.getIcon(Playback.UNMUTE));
 					mediaPlayer.mute(false);
 				}
 				
@@ -67,7 +69,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+					playbackPanel.playButton.setIcon(mediaIcon.getIcon(Playback.PLAY));
 				}
 				
 			});
@@ -80,13 +82,12 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 	public void playing(MediaPlayer mediaPlayer) {
 
 		super.playing(mediaPlayer);
-
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 
 				@Override
 				public void run() {
-					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PAUSE));
+					playbackPanel.playButton.setIcon(mediaIcon.getIcon(Playback.PAUSE));
 				}
 				
 			});
@@ -106,7 +107,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+					playbackPanel.playButton.setIcon(mediaIcon.getIcon(Playback.PLAY));
 					playbackPanel.startTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
 					playbackPanel.finishTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
 					playbackPanel.timeSlider.setValue(0);
@@ -129,7 +130,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					playbackPanel.playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+					playbackPanel.playButton.setIcon(mediaIcon.getIcon(Playback.PLAY));
 					playbackPanel.startTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
 					playbackPanel.finishTimeLabel.setText(PlaybackPanel.initialTimeDisplay);
 					playbackPanel.timeSlider.setValue(0);

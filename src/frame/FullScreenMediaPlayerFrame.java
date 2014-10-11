@@ -108,7 +108,9 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		// Add key binding. 0 means no modfier
 		// Got help from http://stackoverflow.com/questions/15422488/java-keybindings
 		canvasPanel.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "EXIT");
-		canvasPanel.getActionMap().put("EXIT", new ExitFullScreenAction());
+		canvasPanel.getActionMap().put("EXIT", new FullScreenAction("EXIT"));
+		canvasPanel.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "PLAY/PAUSE");
+		canvasPanel.getActionMap().put("PLAY/PAUSE", new FullScreenAction("PLAY/PAUSE"));
 	}
 
 	public void setFullScreen() {
@@ -229,11 +231,20 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 	 *
 	 */
 	
-	private class ExitFullScreenAction extends AbstractAction {
-
+	private class FullScreenAction extends AbstractAction {
+		private String cmd;
+		
+		public FullScreenAction(String cmd) {
+			this.cmd = cmd;
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			exitFullScreen();
+			if (cmd.equals("EXIT")) {
+				exitFullScreen();
+			} else if (cmd.equals("PLAY/PAUSE")) {
+				mediaPlayer.pause();
+			}
 		}
 		
 	}

@@ -4,6 +4,8 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 
 import javax.swing.ButtonModel;
@@ -22,6 +24,7 @@ import javax.swing.plaf.metal.MetalSliderUI;
 import listener.MediaPlayerListener;
 import model.TimeBoundedRangeModel;
 import net.miginfocom.swing.MigLayout;
+import operation.MediaTimer;
 import operation.VamixProcesses;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
@@ -52,14 +55,16 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 	private JPanel timePanel = new JPanel(new MigLayout());
 	private JPanel buttonPanel = new JPanel(new MigLayout());
 	
-	public JButton playButton = new JButton(MediaIcon.getIcon(Playback.PLAY));
-	public JButton stopButton = new JButton(MediaIcon.getIcon(Playback.STOP));
-	public JButton fastforwardButton = new JButton(MediaIcon.getIcon(Playback.FASTFORWARD));
-	public JButton rewindButton = new JButton(MediaIcon.getIcon(Playback.REWIND));
-	public JButton muteButton = new JButton(MediaIcon.getIcon(Playback.UNMUTE));
-	public JButton maxVolumeButton = new JButton(MediaIcon.getIcon(Playback.MAXVOLUME));
-	public JButton openButton = new JButton(MediaIcon.getIcon(Playback.OPEN));
-	public JButton fullScreenButton = new JButton(MediaIcon.getIcon(Playback.FULLSCREEN));
+	public MediaIcon mediaIcon = new MediaIcon(20, 20);
+	
+	public JButton playButton = new JButton(mediaIcon.getIcon(Playback.PLAY));
+	public JButton stopButton = new JButton(mediaIcon.getIcon(Playback.STOP));
+	public JButton fastforwardButton = new JButton(mediaIcon.getIcon(Playback.FASTFORWARD));
+	public JButton rewindButton = new JButton(mediaIcon.getIcon(Playback.REWIND));
+	public JButton muteButton = new JButton(mediaIcon.getIcon(Playback.UNMUTE));
+	public JButton maxVolumeButton = new JButton(mediaIcon.getIcon(Playback.MAXVOLUME));
+	public JButton openButton = new JButton(mediaIcon.getIcon(Playback.OPEN));
+	public JButton fullScreenButton = new JButton(mediaIcon.getIcon(Playback.FULLSCREEN));
 	
 	public JLabel startTimeLabel = new JLabel(initialTimeDisplay); // Initial labels
 	public JLabel finishTimeLabel = new JLabel(initialTimeDisplay);
@@ -92,7 +97,6 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		// Initially set value to 0
 		timeSlider.setValue(0);
 		
-		timeSlider.setToolTipText("Time Bar. Shows elapsed and total time");
 		timePanel.add(startTimeLabel);
 		timePanel.add(timeSlider, "pushx, growx");
 		timePanel.add(finishTimeLabel);
@@ -314,6 +318,21 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		    }
 			
 		});
+		
+		timeSlider.addMouseMotionListener(new MouseMotionAdapter() {
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				if (mediaPlayer.isPlayable()) {
+					// We know the SliderUI is MetalSliderUI
+					MetalSliderUI model = (MetalSliderUI)timeSlider.getUI();
+					int valueAtMousePosition = model.valueForXPosition(e.getPoint().x);
+					timeSlider.setToolTipText(MediaTimer.getFormattedTime(valueAtMousePosition));
+				}
+			}
+			
+		});
+		
 	}
 	
 	/**
@@ -326,10 +345,10 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		
 		if (selection == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = chooser.getSelectedFile();
-
+			
 			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {
 				// Start files from the start.
-				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
+				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0", ":volume=50");
 				FilterPanel.getInstance().checkLog(selectedFile.toString());
 			} else {
 				JOptionPane.showMessageDialog(null, "Not a valid media file! Please choose another file.");
@@ -361,7 +380,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		} else if (e.getSource() == fastforwardButton) {
 			// time in milliseconds
 			fastforwardButton.setSelected(true);
-			playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+			playButton.setIcon(mediaIcon.getIcon(Playback.PLAY));
 			
 			if (mediaPlayer.isPlaying()) {
 				mediaPlayer.pause();
@@ -385,7 +404,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		} else if (e.getSource() == rewindButton) {
 			// time in milliseconds
 			rewindButton.setSelected(true);
-			playButton.setIcon(MediaIcon.getIcon(Playback.PLAY));
+			playButton.setIcon(mediaIcon.getIcon(Playback.PLAY));
 			
 			if (mediaPlayer.isPlaying()) {
 				mediaPlayer.pause();
@@ -408,10 +427,10 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			
 			// Toggles mute. Cannot update in event listener because mute doesn't toggle event listener.
 			if (mediaPlayer.isMute()) {
-				muteButton.setIcon(MediaIcon.getIcon(Playback.UNMUTE));
+				muteButton.setIcon(mediaIcon.getIcon(Playback.UNMUTE));
 				mediaPlayer.mute(false);
 			} else {
-				muteButton.setIcon(MediaIcon.getIcon(Playback.MUTE));
+				muteButton.setIcon(mediaIcon.getIcon(Playback.MUTE));
 				mediaPlayer.mute(true);
 			}
 			

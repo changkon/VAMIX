@@ -44,9 +44,11 @@ public class DownloadPanel extends JPanel implements ActionListener {
 	private JLabel message = new JLabel();
 	private JLabel downloadTableMessage = new JLabel("Multiple downloads possible!");
 	
+	private MediaIcon mediaIcon = new MediaIcon(20, 20);
+	
 	private JTextField urlTextField = new JTextField();
-	private JButton downloadButton = new JButton(MediaIcon.getIcon(Playback.DOWNLOAD));
-	private JButton cancelButton = new JButton(MediaIcon.getIcon(Playback.STOP));
+	private JButton downloadButton = new JButton(mediaIcon.getIcon(Playback.DOWNLOAD));
+	private JButton cancelButton = new JButton(mediaIcon.getIcon(Playback.STOP));
 	
 	// Override cell editable.
 	private DefaultTableModel model = new DefaultTableModel() {
