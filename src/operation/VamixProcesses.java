@@ -1,12 +1,16 @@
 package operation;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import component.MediaType;
 
 /**
@@ -69,7 +73,7 @@ public class VamixProcesses {
 	 */
 	
 	public static boolean validContentType(MediaType type, String path) {
-		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "file --mime-type \'" + path + "\'");
+		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "file -b \'" + path + "\'");
 		builder.redirectErrorStream(true);
 		
 		try {
@@ -78,10 +82,15 @@ public class VamixProcesses {
 			InputStream stdout = process.getInputStream();
 			BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
 			
-			String line = buffer.readLine();
+			String line = "";
+			String[] supportedFormats = type.getSupportedFormats();
 			
-			if (line.contains(type.toString())) {
-				return true;
+			while ((line = buffer.readLine()) != null) {
+				for (String element : supportedFormats) {
+					if (line.contains(element)) {
+						return true;
+					}
+				}
 			}
 			
 		} catch (IOException e) {
@@ -89,6 +98,79 @@ public class VamixProcesses {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Determines if there is a media loaded onto player which is a video and contains an audio track. </br>
+	 * {@link panel.AudioFirstPagePanel} </br>
+	 * {@link panel.AudioSecondPagePanel}
+	 * @param mediaPlayer
+	 * @return boolean
+	 */
+	
+	public static boolean validateVideoWithAudioTrack(EmbeddedMediaPlayer mediaPlayer) {
+		if (mediaPlayer.isPlayable()) {
+			String inputFilename = VamixProcesses.getFilename(mediaPlayer.mrl());
+
+			if (inputFilename == null) {
+				JOptionPane.showMessageDialog(null, "Incorrect file directory");
+				return false;
+			}
+
+			if (VamixProcesses.validContentType(MediaType.VIDEO, inputFilename)) {
+
+				if (mediaPlayer.getAudioTrackCount() == 0) {
+					JOptionPane.showMessageDialog(null, "No audio track exists in video");
+					return false;
+				}
+				
+			} else {
+				JOptionPane.showMessageDialog(null, "Media is not video file");
+				return false;
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "No media recognized");
+			return false;
+		}
+
+		return true;
+	}
+	
+	/**
+	 * Validates that textfield contains a valid file. Furthermore, it contains correct content.
+	 * @param path
+	 * @param mediaType
+	 * @return
+	 */
+	
+	public static boolean validateTextfield(String path, MediaType mediaType) {
+		File f = new File(path);
+
+		if (!f.exists()) {
+			JOptionPane.showMessageDialog(null, path + " is not a valid path");
+			return false;
+		}
+
+		switch(mediaType) {
+			case AUDIO:
+				
+				if (!VamixProcesses.validContentType(MediaType.AUDIO, path)) {
+					JOptionPane.showMessageDialog(null, path + " is not an audio file");
+					return false;
+				}
+				
+				break;
+			case VIDEO:
+				
+				if (!VamixProcesses.validContentType(MediaType.VIDEO, path)) {
+					JOptionPane.showMessageDialog(null, path + " is not an video file");
+					return false;
+				}
+				
+				break;
+		}
+
+		return true;
 	}
 	
 }

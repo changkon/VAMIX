@@ -29,7 +29,7 @@ public class MediaPanel extends JPanel {
 		mediaPlayerComponentPanel = new MediaPlayerComponentPanel();
 		playbackPanel = new PlaybackPanel(mediaPlayerComponentPanel.getMediaPlayer());
 
-		add(mediaPlayerComponentPanel, "push, grow, wrap");
+		add(mediaPlayerComponentPanel, "push, grow, wrap 0px");
 		add(playbackPanel, "pushx, growx");
 	}
 

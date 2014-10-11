@@ -11,13 +11,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -26,16 +23,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
 
-import component.MediaType;
-
 import net.miginfocom.swing.MigLayout;
+import operation.FileSelection;
 import operation.VamixProcesses;
 import res.FilterColor;
 import res.FilterFont;
@@ -43,6 +38,8 @@ import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.FilterPreviewWorker;
 import worker.FilterSaveWorker;
+
+import component.MediaType;
 
 /**
  * Singleton design pattern. Panel contains anything related to filter editing of video.
@@ -315,43 +312,10 @@ public class FilterPanel extends JPanel implements ActionListener {
 			closingTextArea.setForeground(((FilterColor)closingFontColorCombo.getSelectedItem()).getColor());
 		} else if (e.getSource() == saveButton) {
 			if (verifyInput()) {
-
-				JFileChooser chooser = new JFileChooser();
-
-				// Removes the accept all filter.
-				chooser.setAcceptAllFileFilterUsed(false);
-				// Adds mp3 as filter.
-				chooser.addChoosableFileFilter(new FileNameExtensionFilter("MPEG-4", "mp4"));
-
-				int selection = chooser.showSaveDialog(null);
-
-				switch(selection) {
-				case JFileChooser.APPROVE_OPTION:
-
-					File saveFile = chooser.getSelectedFile();
-
-					String extensionType = chooser.getFileFilter().getDescription();
-					String outputFilename = saveFile.getPath();
-
-					if (extensionType.contains("MPEG-4") && !saveFile.getPath().contains(".mp4")) {
-						outputFilename = outputFilename + ".mp4";
-					}
-
-					if (Files.exists(Paths.get(outputFilename))) {
-						int overwriteSelection = JOptionPane.showConfirmDialog(null, "File already exists, do you want to overwrite?",
-								"Select an option", JOptionPane.YES_NO_OPTION);
-
-						// Overwrite if yes.
-						if (overwriteSelection == JOptionPane.OK_OPTION) {
-							executeFilterSave(outputFilename);
-						}
-					} else {
-						executeFilterSave(outputFilename);
-					}
-
-					break;
-				default:
-					break;
+				String outputFilename = FileSelection.getOutputVideoFilename();
+				
+				if (outputFilename != null) {
+					executeFilterSave(outputFilename);
 				}
 
 			}
@@ -437,9 +401,9 @@ public class FilterPanel extends JPanel implements ActionListener {
 					}
 				}
 			}
-		} else if (e.getSource() == openingTimeLength ){
+		} else if (e.getSource() == openingTimeLength){
 			MediaSetting.getInstance().setOpeningFilterLength((String)openingTimeLength.getSelectedItem());
-		} else if (e.getSource() == closingTimeLength ){
+		} else if (e.getSource() == closingTimeLength){
 			MediaSetting.getInstance().setClosingFilterLength((String)closingTimeLength.getSelectedItem());
 		}
 	}

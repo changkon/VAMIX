@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
+import model.TimeBoundedRangeModel;
 import operation.MediaTimer;
 import operation.VamixProcesses;
 import panel.MediaPanel;
@@ -27,7 +28,6 @@ import panel.MediaPlayerComponentPanel;
 import panel.PlaybackPanel;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-
 import component.MediaCountFSM;
 
 /**
@@ -139,6 +139,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 			mediaPlayer.playMedia(mediaPath, ":start-time=" + mediaPanelMediaPlayer.getTime() / 1000);
 			
 			playbackPanel.volumeSlider.setValue(mediaPanelMediaPlayer.getVolume());
+
 		} else {
 			JOptionPane.showMessageDialog(null, "Fullscreen is not supported");
 		}
@@ -157,6 +158,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		if (mediaPlayer.isPlaying()) {
 			mediaPanelMediaPlayer.play();
 		}
+		
 		mediaPlayer.release();
 		dispose();
 	}

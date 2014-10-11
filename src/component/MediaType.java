@@ -7,17 +7,16 @@ package component;
  */
 
 public enum MediaType {
-	AUDIO("audio"),
-	VIDEO("video");
+	AUDIO(new String[] {"audio", "Audio"}),
+	VIDEO(new String[] {"video", "ISO Media", "Matroska", "AVI"});
 	
-	private String type;
+	private String[] type;
 	
-	private MediaType(String type) {
+	private MediaType(String[] type) {
 		this.type = type;
 	}
-
-	@Override
-	public String toString() {
+	
+	public String[] getSupportedFormats() {
 		return type;
 	}
 }

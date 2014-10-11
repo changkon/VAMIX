@@ -82,7 +82,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		// Value doesn't matter but is necessary to initialise because we need to know the STATE of the skipworker.
 		skipWorker = new SkipWorker(Playback.FASTFORWARD, mediaPlayer, this);
 		
-		setLayout(new MigLayout());
+		setLayout(new MigLayout("insets 0px, gap 0px"));
 		
 		setTimePanel();
 		setButtonPanel();
@@ -96,7 +96,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 	private void setTimePanel() {
 		// Initially set value to 0
 		timeSlider.setValue(0);
-		
+
 		timePanel.add(startTimeLabel);
 		timePanel.add(timeSlider, "pushx, growx");
 		timePanel.add(finishTimeLabel);
@@ -164,8 +164,6 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		fullScreenButton.setContentAreaFilled(false);
 		
 		buttonPanel.add(fullScreenButton, "pushx");
-		
-
 	}
 	
 	private void setPlaybackPanel() {
@@ -348,7 +346,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			
 			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {
 				// Start files from the start.
-				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0", ":volume=50");
+				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
 				FilterPanel.getInstance().checkLog(selectedFile.toString());
 			} else {
 				JOptionPane.showMessageDialog(null, "Not a valid media file! Please choose another file.");

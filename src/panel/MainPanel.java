@@ -27,6 +27,8 @@ public class MainPanel extends JPanel {
 	
 	private FilterPanel filterPanel = FilterPanel.getInstance();
 	
+	
+	
 	public static MainPanel getInstance() {
 		if (theInstance == null) {
 			theInstance = new MainPanel();
@@ -39,7 +41,7 @@ public class MainPanel extends JPanel {
 		
 		setVideoPanels();
 		setAudioPanels();
-		
+
 		add(mediaPanel, "push, grow");
 		add(videoPanels, "span 1 2, pushy, growy, wrap");
 		add(audioPanels, "pushx, growx");
