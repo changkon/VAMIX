@@ -10,26 +10,32 @@ import java.io.File;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.miginfocom.swing.MigLayout;
 import operation.FileSelection;
 import operation.VamixProcesses;
-import net.miginfocom.swing.MigLayout;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-import worker.AudioReplaceWorker;
 import worker.AudioTrackWorker;
+import worker.AudioVolumeChangeWorker;
 import component.MediaType;
 import component.Playback;
 
 /**
- * 
+ * Second page of audio panel. Contains adding audio track and volume change.
  * @author changkon
  *
  */
@@ -42,6 +48,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	private TitledBorder title;
 	
 	private JPanel audioTrackPanel = new JPanel(new MigLayout());
+	private JPanel audioVolumePanel = new JPanel(new MigLayout());
 	
 	private JPanel pageNavigationPanel = new JPanel(new MigLayout());
 	private JButton leftButton;
@@ -49,6 +56,9 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	private JButton selectAudioTrackFileButton = new JButton("Choose File");
 	private JTextField selectedAudioTrackFileTextField = new JTextField();
 	private JButton audioTrackButton = new JButton("Add Track");
+	
+	private JSpinner audioVolumeSpinner;
+	private JButton audioVolumeButton = new JButton("Change Volume");
 	
 	public static AudioSecondPagePanel getInstance() {
 		if (theInstance == null) {
@@ -59,20 +69,50 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	}
 	
 	private AudioSecondPagePanel() {
-		setLayout(new MigLayout());
+		setLayout(new MigLayout("fill"));
 		
 		title = BorderFactory.createTitledBorder("Audio Second Page");
 		setBorder(title);
 		
+		setAudioVolumePanel();
 		setAudioTrackPanel();
 		setPageNavigationPanel();
 
+		add(audioVolumePanel, "pushx, growx, wrap 0px");
 		add(audioTrackPanel, "pushx, growx, wrap 0px");
 		add(pageNavigationPanel, "south");
 		
 		addListeners();
 	}
 
+	private void setAudioVolumePanel() {
+		JLabel audioVolumeLabel = new JLabel("Change Volume");
+		
+		Font font = audioVolumeLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f);
+
+		audioVolumeLabel.setFont(font);
+		
+		// Default value/minimum/maximum/step value
+		SpinnerModel model = new SpinnerNumberModel(1, 0, 5, 0.1);
+		audioVolumeSpinner = new JSpinner(model);
+		audioVolumeSpinner.setToolTipText("Set volume of output file. 0 - 5");
+		
+		JComponent editor = audioVolumeSpinner.getEditor();
+		
+		if (editor instanceof DefaultEditor) {
+			((DefaultEditor)editor).getTextField().setColumns(3);
+			((DefaultEditor)editor).getTextField().setEditable(false);
+		}
+		
+		audioVolumeButton.setForeground(Color.WHITE);
+		audioVolumeButton.setBackground(new Color(183, 183, 183));
+		
+		audioVolumePanel.add(audioVolumeLabel, "wrap");
+		audioVolumePanel.add(audioVolumeButton, "split 2, gap right 30");
+		audioVolumePanel.add(audioVolumeSpinner);
+
+	}
+	
 	private void setAudioTrackPanel() {
 		JLabel audioTrackLabel = new JLabel("Add Track");
 		
@@ -85,7 +125,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 
 		audioTrackButton.setForeground(Color.WHITE);
 		audioTrackButton.setBackground(new Color(183, 183, 183));
-		
+
 		audioTrackPanel.add(audioTrackLabel, "wrap");
 		audioTrackPanel.add(selectAudioTrackFileButton);
 		audioTrackPanel.add(selectedAudioTrackFileTextField, "pushx, growx, wrap");
@@ -96,6 +136,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 		MediaIcon mediaIcon = new MediaIcon(15, 15);
 		leftButton = new JButton(mediaIcon.getIcon(Playback.LEFT));
 		
+		leftButton.setToolTipText("Go to first page");
 		leftButton.setContentAreaFilled(false);
 		leftButton.setFocusPainted(false);
 		leftButton.setBorderPainted(false);
@@ -104,6 +145,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	}
 	
 	private void addListeners() {
+		audioVolumeButton.addActionListener(this);
 		selectAudioTrackFileButton.addActionListener(this);
 		audioTrackButton.addActionListener(this);
 		
@@ -124,7 +166,31 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == selectAudioTrackFileButton) {
+		if (e.getSource() == audioVolumeButton) {
+			if (VamixProcesses.validateMediaWithAudioTrack(mediaPlayer)) {
+				String absolutePath = VamixProcesses.getFilename(mediaPlayer.mrl());
+				
+				// Check if media player file is video or audio and call appropriate JFileChooser.
+				if (VamixProcesses.validContentType(MediaType.VIDEO, absolutePath)) {
+					String outputVideoFilename = FileSelection.getOutputVideoFilename();
+					
+					if (outputVideoFilename != null) {
+						executeAudioVolumeChange(absolutePath, outputVideoFilename);
+					}
+					
+				} else if (VamixProcesses.validContentType(MediaType.AUDIO, absolutePath)) {
+					String outputAudioFilename = FileSelection.getOutputAudioFilename();
+					
+					if (outputAudioFilename != null) {
+						executeAudioVolumeChange(absolutePath, outputAudioFilename);
+					}
+					
+				} else {
+					JOptionPane.showMessageDialog(null, "Error reading file");
+				}
+				
+			}
+		} else if (e.getSource() == selectAudioTrackFileButton) {
 			
 			String filename = FileSelection.getInputAudioFilename();
 
@@ -146,6 +212,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 			}
 			
 		} else if (e.getSource() == leftButton) {
+			// Switch to first panel.
 			CardLayout card = MainPanel.getInstance().getAudioCard();
 			JPanel audioPanels = MainPanel.getInstance().getAudioPanel();
 			String firstPageString = MainPanel.getInstance().audioFirstPageString;
@@ -153,6 +220,33 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 			card.show(audioPanels, firstPageString);
 		}
 	}
+	
+	/**
+	 * Execute volume change. Calls AudioVolumeChangeWorker. </br>
+	 * {@link worker.AudioVolumeChangeWorker}
+	 * @param inputFile
+	 * @param outputFilename
+	 */
+	
+	private void executeAudioVolumeChange(String inputFile, String outputFilename) {
+		int lengthOfFile = (int)(mediaPlayer.getLength() / 1000);
+
+		ProgressMonitor monitor = new ProgressMonitor(null, "Changing audio volume has started",
+				"", 0, lengthOfFile);
+		double volume = (double)audioVolumeSpinner.getModel().getValue();
+		
+		AudioVolumeChangeWorker worker = new AudioVolumeChangeWorker(inputFile, outputFilename, volume, monitor);
+		worker.execute();
+		
+	}
+	
+	/**
+	 * Adds extra track to video file. Calls AudioTrackWorker </br>
+	 * {@link worker.AudioTrackWorker}
+	 * @param videoInput
+	 * @param audioInput
+	 * @param videoOutput
+	 */
 	
 	private void executeAudioTrack(String videoInput, String audioInput, String videoOutput) {
 		ProgressMonitor monitor = new ProgressMonitor(null, "Adding audio track has started",

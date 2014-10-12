@@ -12,6 +12,12 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 import setting.MediaSetting;
 
+/**
+ * Incomplete so far.
+ * @author chang
+ *
+ */
+
 @SuppressWarnings("serial")
 public class SettingFrame extends JFrame implements ActionListener {
 	private static SettingFrame theInstance = null;

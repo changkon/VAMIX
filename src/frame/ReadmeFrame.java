@@ -14,6 +14,12 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+/**
+ * Opens the readme document in a JTextArea.
+ * @author chang
+ *
+ */
+
 @SuppressWarnings("serial")
 public class ReadmeFrame extends JFrame {
 	private static ReadmeFrame theInstance = null;

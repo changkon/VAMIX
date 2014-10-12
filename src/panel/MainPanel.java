@@ -12,6 +12,12 @@ import net.miginfocom.swing.MigLayout;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import frame.FullScreenMediaPlayerFrame;
 
+/**
+ * Main Panel which contains mediaplayer, audio panels and video panels.
+ * @author chang
+ *
+ */
+
 @SuppressWarnings("serial")
 public class MainPanel extends JPanel {
 	private static MainPanel theInstance = null;

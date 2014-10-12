@@ -50,7 +50,8 @@ public class FileSelection {
 	}
 	
 	/**
-	 * Returns the output filename of the audio(mp3). Asks user if overwrite is desired if same file exists.
+	 * Returns the output filename of the audio(mp3). Asks user if overwrite is desired if same file exists. </br>
+	 * Returns null if user cancels selection or does not want to overwrite.
 	 * @return String
 	 */
 
@@ -96,6 +97,11 @@ public class FileSelection {
 
 		return null;
 	}
+	
+	/**
+	 * Returns the selected video file from JFileChooser.
+	 * @return String
+	 */
 	
 	public static String getInputVideoFilename() {
 		JFileChooser chooser = new JFileChooser();

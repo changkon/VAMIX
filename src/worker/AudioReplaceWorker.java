@@ -34,7 +34,6 @@ public class AudioReplaceWorker extends SwingWorker<Void, Integer[]> {
 	
 	@Override
 	protected Void doInBackground() throws Exception {
-		//replace avconv command 
 		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "avconv -i \'" + videoFileInput + "\' -i \'" + audioFileInput + "\' -map 0:v -map 1:a " +
 												"-c:v copy -c:a copy -y \'" + videoFileOutput + "\'");
 		builder.redirectErrorStream(true);

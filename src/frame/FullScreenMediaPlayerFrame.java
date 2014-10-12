@@ -20,7 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
-import model.TimeBoundedRangeModel;
 import operation.MediaTimer;
 import operation.VamixProcesses;
 import panel.MediaPanel;
@@ -28,6 +27,7 @@ import panel.MediaPlayerComponentPanel;
 import panel.PlaybackPanel;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+
 import component.MediaCountFSM;
 
 /**
@@ -71,7 +71,6 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		mediaPanelMediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 		
 		MediaPlayerComponentPanel canvasPanel = new MediaPlayerComponentPanel();
-		// Default background.
 		mediaPlayerComponent = canvasPanel.getMediaPlayerComponent();
 		mediaPlayer = canvasPanel.getMediaPlayer();
 		
@@ -113,6 +112,10 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		canvasPanel.getActionMap().put("PLAY/PAUSE", new FullScreenAction("PLAY/PAUSE"));
 	}
 
+	/**
+	 * Enter fullscreen and play from correct time.
+	 */
+	
 	public void setFullScreen() {
 		if (g.isFullScreenSupported()) {
 			if (!mediaPanelMediaPlayer.isPlayable()) {
@@ -135,7 +138,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 			// set fullscreen
 			g.setFullScreenWindow(this);
 			
-			// Play the media with the correct time and volume.
+			// Play the media with the correct time.
 			mediaPlayer.playMedia(mediaPath, ":start-time=" + mediaPanelMediaPlayer.getTime() / 1000);
 			
 			playbackPanel.volumeSlider.setValue(mediaPanelMediaPlayer.getVolume());
@@ -145,6 +148,10 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		}
 	}
 
+	/**
+	 * Exit fullscreen and play correct time in MediaPanel mediaPlayer.
+	 */
+	
 	public void exitFullScreen() {
 		vamixFrame.setVisible(true);
 		
@@ -201,9 +208,15 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 
 		playbackPanel.addComponentListener(this);
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		/*
+		 *  Called everytime the counter is running. Obtain the next state and if it reaches accepting state, hide the
+		 *  playback panel.
+		 */
+		
 		currentState = MediaCountFSM.next(currentState);
 		if (currentState == MediaCountFSM.THREE) {
 			playbackPanel.setVisible(false);
@@ -228,7 +241,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 	}
 
 	/**
-	 * Class responsible for executing exitFullScreen method. It closes the current JFrame.
+	 * Class responsible for executing exitFullScreen method and toggling pause.
 	 * @author changkon
 	 *
 	 */

@@ -6,8 +6,7 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * 
- * Singleton design pattern. Responsible for displaying anything media player related, such as the media player component
- * and buttons, jsliders etc.
+ * Singleton design pattern. Responsible for displaying media player and the playbackPanel.
  *
  */
 

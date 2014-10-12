@@ -57,7 +57,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	private JButton extractButton = new JButton("Extract");
 
-	private JButton extractFullButton = new JButton("Extract entire Video");
+	private JButton extractFullButton = new JButton("Extract entire file");
 
 	private JButton selectAudioReplaceFileButton = new JButton("Choose File");
 	private JTextField selectedAudioReplaceFileTextField = new JTextField();
@@ -78,7 +78,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	}
 
 	private AudioFirstPagePanel() {
-		setLayout(new MigLayout());
+		setLayout(new MigLayout("fill"));
 
 		title = BorderFactory.createTitledBorder("Audio First Page");
 		setBorder(title);
@@ -96,7 +96,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		add(pageNavigationPanel, "south");
 	}
 
-	//initialise panel for extraction and its layout
+	// Initialise panel for extraction and its layout
 	private void setAudioExtractionPanel() {
 		JLabel extractionLabel = new JLabel("Extraction");
 		
@@ -130,7 +130,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		audioExtractionPanel.add(extractFullButton, "gapleft 30, wrap");
 	}
 
-	//initialise panel for replace nad its layout
+	// Initialise panel for replace and its layout
 	private void setAudioReplacePanel() {
 		JLabel replaceAudioLabel = new JLabel("Replace Audio");
 		
@@ -182,7 +182,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		pageNavigationPanel.add(rightButton, "pushx, span, align right");
 	}
 	
-	//initialise listeners
+	// Initialise listeners
 	private void addListeners() {
 		extractButton.addActionListener(this);
 		extractFullButton.addActionListener(this);
@@ -211,7 +211,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == extractButton) {
-			if (validateTime(startTimeInput.getText()) && validateTime(lengthInput.getText()) && VamixProcesses.validateVideoWithAudioTrack(mediaPlayer)) {
+			if (validateTime(startTimeInput.getText()) && validateTime(lengthInput.getText()) && VamixProcesses.validateMediaWithAudioTrack(mediaPlayer)) {
 				String outputFilename = FileSelection.getOutputAudioFilename();
 
 				if (outputFilename != null) {
@@ -220,7 +220,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 			}
 		} else if (e.getSource() == extractFullButton) {
-			if (VamixProcesses.validateVideoWithAudioTrack(mediaPlayer)) {
+			if (VamixProcesses.validateMediaWithAudioTrack(mediaPlayer)) {
 				String outputFilename = FileSelection.getOutputAudioFilename();
 
 				if (outputFilename != null) {

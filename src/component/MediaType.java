@@ -1,7 +1,7 @@
 package component;
 
 /**
- * Enum for media type.
+ * Enum for media type. Each type contains valid keywords which are used to identify file type when called by file command.
  * @author chang
  *
  */

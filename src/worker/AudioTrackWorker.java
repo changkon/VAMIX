@@ -13,6 +13,12 @@ import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
+/**
+ * Adds another audio track to a video file.
+ * @author chang
+ *
+ */
+
 public class AudioTrackWorker extends SwingWorker<Void, Integer[]> {
 	private String videoFileInput;
 	private String audioFileInput;

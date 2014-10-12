@@ -100,9 +100,6 @@ public class FilterPanel extends JPanel implements ActionListener {
 	private JButton previewButton2 = new JButton("Preview Closing Scene");
 	private JButton saveWorkButton = new JButton("Save current work");
 
-	//private MediaPanel mp = MediaPanel.getInstance();
-	//private EmbeddedMediaPlayerComponent mpc = mp.mediaPlayerComponent;
-
 	private String currentFileName = "";
 
 	public static FilterPanel getInstance() {
@@ -112,7 +109,6 @@ public class FilterPanel extends JPanel implements ActionListener {
 		return theInstance;
 	}
 
-	//initialise the filter panel
 	private FilterPanel() {
 		setLayout(new MigLayout("gap rel 0" , "grow"));
 
@@ -203,8 +199,8 @@ public class FilterPanel extends JPanel implements ActionListener {
 				}
 				line = in.readLine();
 			}
-		}catch(Exception eeeee){
-			eeeee.printStackTrace();
+		} catch(Exception ex){
+			ex.printStackTrace();
 		}
 		if(found == false){
 			openingTextArea.setText("Opening Scene Text");
@@ -229,10 +225,10 @@ public class FilterPanel extends JPanel implements ActionListener {
 		((AbstractDocument)openingXTextField.getDocument()).setDocumentFilter(new MyTextFieldFilter());
 		((AbstractDocument)openingYTextField.getDocument()).setDocumentFilter(new MyTextFieldFilter());
 
-		openingOptionPanel.add(openingFontCombo, "split 3"); // split the cell in 3. this so 3 components go into same cell
+		openingOptionPanel.add(openingFontCombo, "split 3"); // split the cell in 3. this is so 3 components go into same cell
 		openingOptionPanel.add(openingFontSizeCombo);
 		openingOptionPanel.add(openingFontColorCombo, "wrap");
-		openingOptionPanel.add(openingXLabel, "split 5"); // split the cell in 4. this is so 4 components go into same cell
+		openingOptionPanel.add(openingXLabel, "split 5"); // split the cell in 5. this is so 5 components go into same cell
 		openingOptionPanel.add(openingXTextField);
 		openingOptionPanel.add(openingYLabel);
 		openingOptionPanel.add(openingYTextField);
@@ -392,12 +388,13 @@ public class FilterPanel extends JPanel implements ActionListener {
 							openingTimeLength.getSelectedItem() + ",::," + closingTimeLength.getSelectedItem();
 					writer.println(txtline);
 					JOptionPane.showMessageDialog(null, "Saved session for this video. Press okay!");
-				} catch (Exception eee) {
-					eee.printStackTrace();
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				} finally {
 					try {
 						writer.close();
-					} catch (Exception ssse) {
+					} catch (Exception x) {
+						x.printStackTrace();
 					}
 				}
 			}
@@ -463,8 +460,6 @@ public class FilterPanel extends JPanel implements ActionListener {
 			JOptionPane.showMessageDialog(null, "This is not a video file");
 			return false;
 		}
-
-
 
 		String openingText = openingTextArea.getText();
 		String closingText = closingTextArea.getText();

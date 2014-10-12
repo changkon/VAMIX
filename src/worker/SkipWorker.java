@@ -5,15 +5,15 @@ import java.util.List;
 import javax.swing.SwingWorker;
 
 import operation.MediaTimer;
-import component.Playback;
-import panel.MediaPanel;
 import panel.PlaybackPanel;
 import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
+import component.Playback;
+
 /**
  * 
- * Skips the media player some time depending on the playback mode it is given. <br />
+ * Skips the media player some time depending on the playback mode it is given. </br>
  * 
  * Also check {@link component.Playback }
  *
@@ -53,8 +53,7 @@ public class SkipWorker extends SwingWorker<Void, Integer> {
 
 	@Override
 	protected void process(List<Integer> chunks){
-		
-		for(Integer i: chunks){
+		for (Integer i: chunks){
 			playbackPanel.timeSlider.setValue(i);
 			playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(i.longValue()));
 		}

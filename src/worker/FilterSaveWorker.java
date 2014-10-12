@@ -18,9 +18,7 @@ import res.FilterFont;
 import setting.MediaSetting;
 
 /**
- * 
  * Encodes filter options to file. Progress is shown on progress monitor.
- *
  */
 
 public class FilterSaveWorker extends SwingWorker<Void, Integer> {

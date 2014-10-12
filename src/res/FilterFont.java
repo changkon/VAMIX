@@ -23,7 +23,7 @@ public enum FilterFont {
 	private FilterFont(String path) {
 		try {
 			this.path = path;
-			font = Font.createFont(Font.TRUETYPE_FONT, new File(path)); // may need to edit.
+			font = Font.createFont(Font.TRUETYPE_FONT, new File(path));
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

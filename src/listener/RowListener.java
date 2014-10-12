@@ -4,6 +4,13 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
+/**
+ * Responsible for updating the table whenever the table is deleted. This is important so that the table is not updating an invalid
+ * row which will cause an exception.
+ * @author chang
+ *
+ */
+
 public class RowListener implements TableModelListener {
 	private int row;
 	private String filename;

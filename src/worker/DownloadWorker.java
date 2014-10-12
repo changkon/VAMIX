@@ -18,6 +18,12 @@ import javax.swing.table.DefaultTableModel;
 import panel.DownloadPanel;
 import listener.RowListener;
 
+/**
+ * Downloads file online using wget.
+ * @author chang
+ *
+ */
+
 public class DownloadWorker extends SwingWorker<Void, Integer[]> {
 	private String url;
 	private String filename;
@@ -39,7 +45,7 @@ public class DownloadWorker extends SwingWorker<Void, Integer[]> {
 	protected Void doInBackground() {
 
 		try {
-			ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "wget -c \'" + url + "\'");
+			ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "wget -c -O " + filename + " \'" + url + "\'");
 			// Note: wget normally outputs log messages onto stderr.
 			builder.redirectErrorStream(true);
 			Process process = builder.start();

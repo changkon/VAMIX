@@ -7,9 +7,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.ButtonModel;
@@ -27,12 +24,18 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
-import operation.VamixProcesses;
+import operation.FileSelection;
 import res.MediaIcon;
 import worker.DownloadWorker;
 
 import component.Playback;
 import component.ProgressRenderer;
+
+/**
+ * Panel responsible for showing download table and executing downloads.
+ * @author chang
+ *
+ */
 
 @SuppressWarnings("serial")
 public class DownloadPanel extends JPanel implements ActionListener {
@@ -62,8 +65,6 @@ public class DownloadPanel extends JPanel implements ActionListener {
 	private JScrollPane scrollPane = new JScrollPane(table);
 	
 	private ConcurrentHashMap<String, DownloadWorker> downloadList = new ConcurrentHashMap<String, DownloadWorker>();
-	
-	private String currentDir = System.getProperty("user.dir");
 	
 	// Singleton design pattern. I only want one downloadMenu panel at a time.
 	public static DownloadPanel getInstance() {
@@ -117,9 +118,11 @@ public class DownloadPanel extends JPanel implements ActionListener {
 		model.addColumn("Progress");
 		model.addColumn("Time Remaining");
 		
+		// Change alignment of text.
 		DefaultTableCellRenderer timeRemainingRenderer = new DefaultTableCellRenderer();
 		timeRemainingRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		
+		// Set second column to show progress bars.
 		table.getColumnModel().getColumn(1).setCellRenderer(new ProgressRenderer());
 		table.getColumnModel().getColumn(2).setCellRenderer(timeRemainingRenderer);
 		table.setRowSelectionAllowed(true);
@@ -170,52 +173,17 @@ public class DownloadPanel extends JPanel implements ActionListener {
 				return;
 			}
 			
-			String filename = VamixProcesses.getBasename(url);
-			String path = currentDir + "/" + filename;
-			Path pathName = Paths.get(path);
-
-			// Confirmation that download is from open source website.
-			int openSourceSelection = JOptionPane.showConfirmDialog(null, "Please confirm that " + filename + " is open source", "Are you sure?",
-					JOptionPane.YES_NO_CANCEL_OPTION);
-
-			// Checks the response to above question. Depending on response, different messages will show up.
-			switch (openSourceSelection) {
-				case JOptionPane.YES_OPTION:
-					if (Files.exists(pathName)) {
-						Object[] choices = {"Continue", "Overwrite", "Cancel"};
-						int operationSelection = JOptionPane.showOptionDialog(
-								null,
-								"File already exists. Would you like to continue, overwrite or cancel download?",
-								"Operation Query",
-								JOptionPane.YES_NO_CANCEL_OPTION,
-								JOptionPane.QUESTION_MESSAGE,
-								null,
-								choices,
-								choices[0]);
-
-						if (operationSelection == JOptionPane.YES_OPTION) {
-							executeDownload(url, filename);
-						} else if (operationSelection == JOptionPane.NO_OPTION) {
-							try {
-								Files.delete(pathName);
-								executeDownload(url, filename);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-						}
-
-					} else {
-						executeDownload(url, filename);
-					}
-					break;
-				case JOptionPane.NO_OPTION:
-					JOptionPane.showMessageDialog(null, "Download has been aborted.");
-					break;
-				case JOptionPane.CANCEL_OPTION:
-					break;
+			String filename = FileSelection.getOutputAudioFilename();
+			
+			if (filename != null) {
+				executeDownload(url, filename);
 			}
+			
 		} else if (e.getSource() == cancelButton) {
+			// Cancels correct download by cancelling the row selected. If no row is selected, it tells user.
 			int rowSelected = table.getSelectedRow();
+			
+			// -1 if no row has been selected.
 			if (rowSelected == -1) {
 				JOptionPane.showMessageDialog(null, "Please select a download to cancel");
 			} else {
@@ -224,6 +192,13 @@ public class DownloadPanel extends JPanel implements ActionListener {
 		}
 	}
 
+	/**
+	 * Starts download by executing DownloadWorker. </br>
+	 * {@link worker.DownloadWorker}
+	 * @param url
+	 * @param filename
+	 */
+	
 	private void executeDownload(String url, String filename) {
 		try {
 			if (validURLCheck(url)) {
@@ -240,8 +215,12 @@ public class DownloadPanel extends JPanel implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Cancels the appropriate download by finding it from the list from the given key.
+	 * @param filename
+	 */
+	
 	private void notifyProcesses(String filename) {
-		// Cancels the appropriate Download instance. At the moment, I have only been able to create one download instance.
 		DownloadWorker download = downloadList.get(filename);
 		download.cancel(true);
 	}

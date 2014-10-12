@@ -16,9 +16,7 @@ import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 /**
- * 
  * Shows preview of filter options. Opens a JFrame and shows the video with filters.
- *
  */
 
 public class FilterPreviewWorker extends SwingWorker<Void, Void> {

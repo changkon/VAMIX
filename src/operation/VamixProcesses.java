@@ -25,7 +25,7 @@ public class VamixProcesses {
 	 * This method returns the basename of any string file using a linux commands
 	 * by creating a new process.
 	 * @param filename
-	 * @return
+	 * @return basename
 	 */
 	
 	public static String getBasename(String filename) {
@@ -98,6 +98,32 @@ public class VamixProcesses {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Determines if audio track exists in media player.
+	 * @param mediaPlayer
+	 * @return
+	 */
+	
+	public static boolean validateMediaWithAudioTrack(EmbeddedMediaPlayer mediaPlayer) {
+		if (mediaPlayer.isPlayable()) {
+			String inputFilename = VamixProcesses.getFilename(mediaPlayer.mrl());
+
+			if (inputFilename == null) {
+				JOptionPane.showMessageDialog(null, "Incorrect file directory");
+				return false;
+			}
+				if (mediaPlayer.getAudioTrackCount() == 0) {
+					JOptionPane.showMessageDialog(null, "No audio track exists");
+					return false;
+				}
+		} else {
+			JOptionPane.showMessageDialog(null, "No media recognized");
+			return false;
+		}
+
+		return true;
 	}
 	
 	/**
