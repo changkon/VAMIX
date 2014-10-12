@@ -1,8 +1,8 @@
 package panel;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,17 +19,21 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 import operation.FileSelection;
 import operation.MediaTimer;
 import operation.VamixProcesses;
+import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioReplaceWorker;
 import worker.ExtractAudioWorker;
 import worker.OverlayWorker;
 
 import component.MediaType;
+import component.Playback;
 
 /**
  * First page of audio panel. Contains extraction, replace and overlay features.
@@ -47,30 +52,24 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private JPanel audioReplacePanel = new JPanel(new MigLayout());
 	private JPanel audioOverlayPanel = new JPanel(new MigLayout());
 
-	private JLabel extractionLabel = new JLabel("Extraction");
-
-	private JLabel timeLabel = new JLabel("Please input times in hh:mm:ss");
-	private JLabel startTimeLabel = new JLabel("Start Time:");
 	private JTextField startTimeInput = new JTextField(10);
-	private JLabel lengthLabel = new JLabel("Length Time:");
 	private JTextField lengthInput = new JTextField(10);
 	private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	private JButton extractButton = new JButton("Extract");
 
 	private JButton extractFullButton = new JButton("Extract entire Video");
 
-	private JLabel replaceAudioLabel = new JLabel("Replace Audio");
-
 	private JButton selectAudioReplaceFileButton = new JButton("Choose File");
 	private JTextField selectedAudioReplaceFileTextField = new JTextField();
 	private JButton audioReplaceButton = new JButton("Replace");
-
-	private JLabel audioOverlayLabel = new JLabel("Overlay audio");
 
 	private JButton selectAudioOverlayFileButton = new JButton("Choose File");
 	private JTextField selectedAudioOverlayFileTextField = new JTextField();
 	private JButton audioOverlayButton = new JButton("Overlay");
 
+	private JPanel pageNavigationPanel = new JPanel(new MigLayout());
+	private JButton rightButton;
+	
 	public static AudioFirstPagePanel getInstance() {
 		if (theInstance == null) {
 			theInstance = new AudioFirstPagePanel();
@@ -81,22 +80,31 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private AudioFirstPagePanel() {
 		setLayout(new MigLayout());
 
-		title = BorderFactory.createTitledBorder("Audio");
+		title = BorderFactory.createTitledBorder("Audio First Page");
 		setBorder(title);
-
+		
 		setAudioExtractionPanel();
 		setAudioReplacePanel();
 		setAudioOverlayPanel();
-
+		setPageNavigationPanel();
+		
 		addListeners();
 
-		add(audioExtractionPanel, "wrap, pushx, growx");
-		add(audioReplacePanel, "wrap, pushx, growx");
-		add(audioOverlayPanel, "pushx, growx");
+		add(audioExtractionPanel, "wrap 0px, pushx, growx");
+		add(audioReplacePanel, "wrap 0px, pushx, growx");
+		add(audioOverlayPanel, "pushx, growx, wrap 0px");
+		add(pageNavigationPanel, "south");
 	}
 
 	//initialise panel for extraction and its layout
 	private void setAudioExtractionPanel() {
+		JLabel extractionLabel = new JLabel("Extraction");
+		
+		JLabel timeLabel = new JLabel("Please input times in hh:mm:ss");
+		JLabel startTimeLabel = new JLabel("Start Time:");
+		
+		JLabel lengthLabel = new JLabel("Length Time:");
+		
 		Font font = extractionLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f); // Default is 12.
 
 		JLabel orLabel = new JLabel("OR");
@@ -124,6 +132,8 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 	//initialise panel for replace nad its layout
 	private void setAudioReplacePanel() {
+		JLabel replaceAudioLabel = new JLabel("Replace Audio");
+		
 		Font font = replaceAudioLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f); // Default is 12.
 
 		replaceAudioLabel.setFont(font);
@@ -142,6 +152,8 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	}
 
 	private void setAudioOverlayPanel() {
+		JLabel audioOverlayLabel = new JLabel("Overlay audio");
+		
 		Font font = audioOverlayLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f);
 
 		audioOverlayLabel.setFont(font);
@@ -158,6 +170,18 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		audioOverlayPanel.add(audioOverlayButton);
 	}
 
+	private void setPageNavigationPanel() {
+		MediaIcon mediaIcon = new MediaIcon(15, 15);
+		rightButton = new JButton(mediaIcon.getIcon(Playback.RIGHT));
+		
+		rightButton.setToolTipText("Go to second page");
+		rightButton.setContentAreaFilled(false);
+		rightButton.setFocusPainted(false);
+		rightButton.setBorderPainted(false);
+		
+		pageNavigationPanel.add(rightButton, "pushx, span, align right");
+	}
+	
 	//initialise listeners
 	private void addListeners() {
 		extractButton.addActionListener(this);
@@ -168,6 +192,20 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 		selectAudioOverlayFileButton.addActionListener(this);
 		audioOverlayButton.addActionListener(this);
+		
+		rightButton.getModel().addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            ButtonModel model = (ButtonModel) e.getSource();
+	            if (model.isRollover()) {
+	            	rightButton.setBorderPainted(true);
+	            } else {
+	            	rightButton.setBorderPainted(false);
+	            }
+	        }
+	    });
+		
+		rightButton.addActionListener(this);
 	}
 
 	@Override
@@ -209,7 +247,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 			if (VamixProcesses.validateVideoWithAudioTrack(mediaPlayer) && VamixProcesses.validateTextfield(selectedAudioReplaceFileTextField.getText(), MediaType.AUDIO)) {
 				File audioFile = new File(selectedAudioReplaceFileTextField.getText());
 
-				String audioPath = audioFile.getPath();
+				String audioPath = audioFile.getAbsolutePath();
 				String videoPath = FileSelection.getOutputVideoFilename();
 
 				if (videoPath != null) {
@@ -229,7 +267,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 				// http://stackoverflow.com/questions/3140992/read-out-time-length-duration-of-an-mp3-song-in-java
 				File audioFile = new File(selectedAudioOverlayFileTextField.getText());
 
-				String audioPath = audioFile.getPath();
+				String audioPath = audioFile.getAbsolutePath();
 
 				String videoPath = FileSelection.getOutputVideoFilename();
 
@@ -237,6 +275,13 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 					executeOverlay(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
 				}
 			}
+		} else if (e.getSource() == rightButton) {
+			CardLayout card = MainPanel.getInstance().getAudioCard();
+			
+			JPanel audioPanels = MainPanel.getInstance().getAudioPanel();
+			String secondPageString = MainPanel.getInstance().audioSecondPageString;
+			
+			card.show(audioPanels, secondPageString);
 		}
 	}
 

@@ -33,6 +33,8 @@ public class MediaIcon {
 	private ImageIcon open = new ImageIcon(path + "/res/open.png");
 	private ImageIcon download = new ImageIcon(path + "/res/download.png");
 	private ImageIcon fullscreen = new ImageIcon(path + "/res/fullscreen.png");
+	private ImageIcon left = new ImageIcon(path + "/res/left.png");
+	private ImageIcon right = new ImageIcon(path + "/res/right.png");
 	
 	public MediaIcon(int width, int height) {
 		this.width = width;
@@ -75,6 +77,12 @@ public class MediaIcon {
 				break;
 			case FULLSCREEN:
 				icon = fullscreen;
+				break;
+			case LEFT:
+				icon = left;
+				break;
+			case RIGHT:
+				icon = right;
 				break;
 		}
 		

@@ -23,11 +23,11 @@ public class MainPanel extends JPanel {
 	
 	// AudioPanels
 	private AudioFirstPagePanel audioFirstPagePanel = AudioFirstPagePanel.getInstance();
+	public final String audioFirstPageString = "First Page";
 	private AudioSecondPagePanel audioSecondPagePanel = AudioSecondPagePanel.getInstance();
+	public final String audioSecondPageString = "Second Page";
 	
 	private FilterPanel filterPanel = FilterPanel.getInstance();
-	
-	
 	
 	public static MainPanel getInstance() {
 		if (theInstance == null) {
@@ -41,7 +41,7 @@ public class MainPanel extends JPanel {
 		
 		setVideoPanels();
 		setAudioPanels();
-
+		
 		add(mediaPanel, "push, grow");
 		add(videoPanels, "span 1 2, pushy, growy, wrap");
 		add(audioPanels, "pushx, growx");
@@ -68,7 +68,24 @@ public class MainPanel extends JPanel {
 	}
 	
 	private void setAudioPanels() {
-		audioPanels.add(audioFirstPagePanel);
-		audioPanels.add(audioSecondPagePanel);
+		audioPanels.add(audioFirstPagePanel, audioFirstPageString);
+		audioPanels.add(audioSecondPagePanel, audioSecondPageString);
 	}
+	
+	public CardLayout getAudioCard() {
+		return (CardLayout)audioPanels.getLayout();
+	}
+	
+	public JPanel getAudioPanel() {
+		return audioPanels;
+	}
+	
+	public CardLayout getVideoCard() {
+		return (CardLayout)videoPanels.getLayout();
+	}
+
+	public JPanel getVideoPanel() {
+		return videoPanels;
+	}
+	
 }

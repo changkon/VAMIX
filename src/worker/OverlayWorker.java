@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
@@ -15,7 +17,7 @@ import javax.swing.SwingWorker;
  * Overlays video with existing audio and another video. Outputs a new video.
  */
 
-public class OverlayWorker extends SwingWorker<Void, Integer> {
+public class OverlayWorker extends SwingWorker<Void, Integer[]> {
 	private String videoFileInput;
 	private String audioFileInput;
 	private String videoFileOutput;
@@ -41,7 +43,8 @@ public class OverlayWorker extends SwingWorker<Void, Integer> {
 		InputStream stdout = process.getInputStream();
 		BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
 		
-		@SuppressWarnings("unused")
+		Pattern p = Pattern.compile("\\d*kB");
+		Matcher m;
 		String line = "";
 		
 		while((line = buffer.readLine()) != null) {
@@ -52,7 +55,16 @@ public class OverlayWorker extends SwingWorker<Void, Integer> {
 			if (progressValue == 100) {
 				progressValue = 0;
 			}
-			publish(progressValue);
+			m = p.matcher(line);
+			
+			if (m.find()) {
+				int endLength = m.group().length() - 2;
+				Integer size = Integer.parseInt(m.group().substring(0, endLength));
+				Integer[] values = {size, progressValue};
+				
+				publish(values);
+			}
+			
 			progressValue += 10;
 		}
 		
@@ -68,10 +80,11 @@ public class OverlayWorker extends SwingWorker<Void, Integer> {
 	}
 
 	@Override
-	protected void process(List<Integer> chunks) {
+	protected void process(List<Integer[]> chunks) {
 		if (!isDone()) {
-			for (Integer i : chunks) {
-				monitor.setProgress(i);
+			for (Integer[] i : chunks) {
+				monitor.setNote("In progress. Completed " + i[0] + "kb");
+				monitor.setProgress(i[1]);
 			}
 		}
 	}
