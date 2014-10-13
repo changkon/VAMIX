@@ -94,7 +94,6 @@ Change Volume
   
 Known Bugs
 ----------
-----------
 
   1. FullScreen is not perfect. If the media player is paused during the main menu entering fullscreen will play
      video instead of remaining paused. Mute icons and keeping mute is not implemented at the moment.

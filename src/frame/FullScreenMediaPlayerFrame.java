@@ -188,7 +188,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 			public void mouseMoved(MouseEvent e) {
 				t.stop();
 				t.start();
-				currentState = MediaCountFSM.next(MediaCountFSM.RESET);
+				currentState = currentState.reset();
 
 				playbackPanel.setVisible(true);
 			}
@@ -217,7 +217,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		 *  playback panel.
 		 */
 		
-		currentState = MediaCountFSM.next(currentState);
+		currentState = currentState.next();
 		if (currentState == MediaCountFSM.THREE) {
 			playbackPanel.setVisible(false);
 		}

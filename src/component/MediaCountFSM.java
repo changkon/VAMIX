@@ -3,11 +3,11 @@ package component;
 /**
  * Provides the logic for FullScreenMediaPlayer to control visibility of playbackPanel. </br>
  * 
- * <b>Note:</b> Although NEXT is not a state, assume calling the method next(MediaCountFSM state) is the input NEXT.</br>
+ * <b>Note:</b> The methods next() and reset() are the inputs</br>
  * 
  * <b>Input:</b> NEXT, RESET</br>
  * <b>Initial:</b> ZERO</br>
- * <b>States:</b> ZERO, ONE, TWO, THREE, NEXT, RESET</br>
+ * <b>States:</b> ZERO, ONE, TWO, THREE</br>
  * <b>Accepting:</b> THREE</br>
  * <b>Transition Function</b></br>
  * T(ZERO, NEXT) = ONE			T(ZERO, RESET) = ZERO</br>
@@ -22,21 +22,24 @@ package component;
  */
 
 public enum MediaCountFSM {
-	ZERO, ONE, TWO, THREE, RESET;
+	ZERO, ONE, TWO, THREE;
 	
-	public static MediaCountFSM next(MediaCountFSM state) {
-		switch (state) {
+	public MediaCountFSM next() {
+
+		switch (this) {
 			case ZERO:
 				return ONE;
 			case ONE:
 				return TWO;
 			case TWO:
 				return THREE;
-			case THREE:
-				return THREE;
 			default:
-				// input is reset.
-				return ZERO;
+				// T(THREE, NEXT) = THREE
+				return THREE;
 		}
+	}
+	
+	public MediaCountFSM reset() {
+		return ZERO;
 	}
 }
