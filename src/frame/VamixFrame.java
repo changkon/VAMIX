@@ -14,7 +14,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import operation.VamixProcesses;
 import panel.DownloadPanel;
 import panel.MainPanel;
 import panel.MediaPanel;
@@ -62,7 +61,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setMinimumSize(new Dimension(1270, 950));
 		setPreferredSize(new Dimension(1270, 950));
-		setResizable(false); // change later but at the moment, make it not resizable.
+//		setResizable(false); // change later but at the moment, make it not resizable.
 		
 		setMenuBar();
 		setJMenuBar(menuBar);
@@ -142,8 +141,6 @@ public class VamixFrame extends JFrame implements ActionListener {
 			public void run() {
 				VamixFrame vamixFrame = new VamixFrame();
 				vamixFrame.setVisible(true);
-				
-				System.out.println(VamixProcesses.probeDuration("/home/changkon/Videos/rajonrondo.mp4"));
 			}
 			
 		});

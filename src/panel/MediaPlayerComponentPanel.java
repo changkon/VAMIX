@@ -24,7 +24,7 @@ public class MediaPlayerComponentPanel extends JPanel {
 		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 		mediaPlayer = mediaPlayerComponent.getMediaPlayer();
 		
-		add(mediaPlayerComponent, BorderLayout.CENTER);
+		add(mediaPlayerComponent.getVideoSurface(), BorderLayout.CENTER);
 	}
 	
 	public EmbeddedMediaPlayerComponent getMediaPlayerComponent() {

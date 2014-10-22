@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+
 import component.MediaType;
 
 /**

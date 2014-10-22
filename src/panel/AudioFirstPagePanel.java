@@ -82,7 +82,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 		title = BorderFactory.createTitledBorder("Audio First Page");
 		setBorder(title);
-		
+
 		setAudioExtractionPanel();
 		setAudioReplacePanel();
 		setAudioOverlayPanel();
@@ -152,7 +152,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	}
 
 	private void setAudioOverlayPanel() {
-		JLabel audioOverlayLabel = new JLabel("Overlay audio");
+		JLabel audioOverlayLabel = new JLabel("Overlay Audio");
 		
 		Font font = audioOverlayLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f);
 
