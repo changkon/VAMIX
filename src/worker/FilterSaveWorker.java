@@ -1,17 +1,6 @@
 package worker;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
-import javax.swing.SwingWorker;
 
 import res.FilterColor;
 import res.FilterFont;
@@ -21,29 +10,19 @@ import setting.MediaSetting;
  * Encodes filter options to file. Progress is shown on progress monitor.
  */
 
-public class FilterSaveWorker extends SwingWorker<Void, Integer> {
-	private String inputFilename;
-	private String outputFilename;
-	private String openingText;
-	private String closingText;
-	private String openingX;
-	private String openingY;
-	private String closingX;
-	private String closingY;
-	private FilterFont openingFont;
-	private FilterFont closingFont;
-	private int openingFontSize;
-	private int closingFontSize;
-	private FilterColor openingFontColor;
-	private FilterColor closingFontColor;
-	private ProgressMonitor monitor;
-	private int lengthOfVideo;
+public class FilterSaveWorker extends DefaultWorker {
+	private String inputFile, outputFile, openingText, closingText, openingX, openingY, closingX, closingY;
+	private FilterFont openingFont, closingFont;
+	private int openingFontSize, closingFontSize, filterOpeningLength, filterClosingLength, lastSeconds;
+	private FilterColor openingFontColor, closingFontColor;
 	
-	public FilterSaveWorker(String inputFilename, String outputFilename, String openingText, String closingText, String openingX, String closingX, String openingY, String closingY, FilterFont openingFont, 
+	public FilterSaveWorker(String inputFile, String outputFile, String openingText, String closingText, String openingX, String closingX, String openingY, String closingY, FilterFont openingFont, 
 			FilterFont closingFont, int openingFontSize, int closingFontSize, FilterColor openingFontColor, FilterColor closingFontColor, ProgressMonitor monitor, int lengthOfVideo) {
 		
-		this.inputFilename = inputFilename;
-		this.outputFilename = outputFilename;
+		super(monitor);
+		
+		this.inputFile = inputFile;
+		this.outputFile = outputFile;
 		this.openingText = openingText;
 		this.closingText = closingText;
 		
@@ -79,92 +58,57 @@ public class FilterSaveWorker extends SwingWorker<Void, Integer> {
 		this.closingFontSize = closingFontSize;
 		this.openingFontColor = openingFontColor;
 		this.closingFontColor = closingFontColor;
-		this.monitor = monitor;
-		this.lengthOfVideo = lengthOfVideo;
+		
+		filterOpeningLength = MediaSetting.getInstance().getOpeningFilterLength();
+		filterClosingLength = MediaSetting.getInstance().getClosingFilterLength();
+		lastSeconds = monitor.getMaximum() - filterClosingLength;
+		
+		initialiseVariables();
 	}
-	
+
 	@Override
-	protected Void doInBackground() throws Exception {
+	protected String getCommand() {
 		//detects the number of seconds to display for and what to display
-		StringBuilder command = new StringBuilder("avconv -i \'" + inputFilename + "\' -c:a copy -vf ");
-		int filterOpeningLength = MediaSetting.getInstance().getOpeningFilterLength();
-		int filterClosingLength = MediaSetting.getInstance().getClosingFilterLength();
-		int lastSeconds = lengthOfVideo - filterClosingLength;
+		StringBuilder command = new StringBuilder("avconv -i \'" + inputFile + "\' -c:a copy -vf ");
 		
 		boolean hasOpeningText = !openingText.equals("");
 		boolean hasClosingText = !closingText.equals("");
 		
+		command.append("drawtext=\"fontfile=");
+		
 		//if there is opening and closing
 		if (hasOpeningText && hasClosingText) {
-			command.append("drawtext=\"fontfile=" + openingFont.getPath() + ": fontsize=" + openingFontSize + ": fontcolor=" + openingFontColor.toString() + ": x=" + openingX + ": y=" 
-					+ openingY + ": text=\'" + openingText + "\': draw=\'lt(t," + filterOpeningLength + ")\':,drawtext=fontfile=" + closingFont.getPath() + ": fontsize=" + closingFontSize + 
-					": fontcolor=" + closingFontColor.toString() + ": x=" +	closingX + ": y=" + closingY + ": text=\'" + closingText + "\': draw=\'gt(t," + lastSeconds + ")\'\" \'"
-					+ outputFilename + "\'");
+			command.append(getOpeningCommand());
+			command.append(":,drawtext=fontfile=");
+			command.append(getClosingCommand());
 		} else if (hasOpeningText) { //if there only is opening
-			command.append("drawtext=\"fontfile=" + openingFont.getPath() + ": fontsize=" + openingFontSize + ": fontcolor=" + openingFontColor.toString() + ": x=" + openingX + 
-					": y=" + openingY + ": text=\'" + openingText + "\': draw=\'lt(t," + filterOpeningLength + ")\'\" \'" + outputFilename + "\'");
+			command.append(getOpeningCommand());
 		} else {//if there is only closing 
-			command.append("drawtext=\"fontfile=" + closingFont.getPath() + ": fontsize=" + closingFontSize + ": fontcolor=" + closingFontColor.toString() + ": x=" + closingX + 
-					": y=" + closingY + ": text=\'" + closingText + "\': draw=\'gt(t," + lastSeconds + ")\'\" \'" + outputFilename + "\'");
-		}
-		//call the process
-		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", command.toString());
-		builder.redirectErrorStream(true);
-		Process process = builder.start();
-		
-		InputStream stdout = process.getInputStream();
-		BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
-				
-		Pattern p = Pattern.compile("\\btime=\\b\\d+.\\d+");
-		Matcher m;
-		String line = "";
-		
-		while ((line = buffer.readLine()) != null) {
-			
-			if (monitor.isCanceled()) {
-				process.destroy();
-				break;
-			}
-			
-			m = p.matcher(line);
-			
-			if (m.find()) {
-				// greedy solution. We know if a string matches pattern, it must start with time=
-				publish((int)Double.parseDouble(m.group().substring(5)));
-			}
+			command.append(getClosingCommand());
 		}
 		
-		process.waitFor();
-		
-		if (monitor.isCanceled()) {
-			this.cancel(true);
-		}
-		
-		return null;
+		command.append("\" -y \'" + outputFile + "\'");
+
+		return command.toString();
+	}
+
+	private String getOpeningCommand() {
+		return openingFont.getPath() + ": fontsize=" + openingFontSize + ": fontcolor=" + openingFontColor.toString() + ": x=" + openingX + ": y=" 
+				+ openingY + ": text=\'" + openingText + "\': draw=\'lt(t," + filterOpeningLength + ")\'";
+	}
+	
+	private String getClosingCommand() {
+		return closingFont.getPath() + ": fontsize=" + closingFontSize + ": fontcolor=" + closingFontColor.toString() + ": x=" + closingX + 
+				": y=" + closingY + ": text=\'" + closingText + "\': draw=\'gt(t," + lastSeconds + ")\'";
+	}
+	
+	@Override
+	protected String getSuccessMessage() {
+		return "Filtering has completed";
 	}
 
 	@Override
-	protected void process(List<Integer> chunks) {
-		if (!isDone()) {
-			for (Integer element : chunks) {
-				String format = String.format("Completed : %2d%%", (int)(((double)element / lengthOfVideo) * 100));
-				monitor.setNote(format);
-				monitor.setProgress(element);
-			}
-		}
+	protected String getCancelMesssage() {
+		return "Filtering was interrupted";
 	}
-	
-	@Override
-	protected void done() {
-		try {
-			monitor.close();
-			get();
-			JOptionPane.showMessageDialog(null, "Filtering has completed");
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		} catch (CancellationException e) {
-			JOptionPane.showMessageDialog(null, "Filtering was interrupted");
-		}
-	}
-	
 }

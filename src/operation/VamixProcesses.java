@@ -199,4 +199,40 @@ public class VamixProcesses {
 		return true;
 	}
 	
+	/**
+	 * Probes the content of media file and return the duration of the file in seconds. If the media file does not exist, return -1.
+	 * @param path
+	 * @return time of media file in seconds
+	 */
+	
+	public static int probeDuration(String path) {
+		// Redirect error stream to output stream.
+		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "avprobe \'" + path + "\' 2>&1 | grep Duration");
+		
+		try {
+			Process process = builder.start();
+			
+			InputStream stdout = process.getInputStream();
+			BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
+			
+			String line = "";
+			
+			// Should only be one line printed.
+			if ((line = buffer.readLine()) != null) {
+				// Extract just the duration. Ignore the milliseconds. Format, hh:mm:ss
+				Pattern p = Pattern.compile("\\d{2}:\\d{2}:\\d{2}");
+				Matcher m = p.matcher(line);
+				
+				if (m.find()) {
+					return MediaTimer.getSeconds(m.group());
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return -1;
+	}
+	
 }

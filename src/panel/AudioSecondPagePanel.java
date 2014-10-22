@@ -249,8 +249,11 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	 */
 	
 	private void executeAudioTrack(String videoInput, String audioInput, String videoOutput) {
+		int videoLength = (int)(mediaPlayer.getLength() / 1000);
+		int audioLength = VamixProcesses.probeDuration(audioInput);
+		
 		ProgressMonitor monitor = new ProgressMonitor(null, "Adding audio track has started",
-				"In progress..", 0, 100);
+				"In progress..", 0, Math.max(videoLength, audioLength));
 
 		AudioTrackWorker worker = new AudioTrackWorker(videoInput, audioInput, videoOutput, monitor);
 		worker.execute();

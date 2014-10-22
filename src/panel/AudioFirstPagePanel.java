@@ -295,8 +295,15 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	 */
 
 	private void executeReplace(String videoInput, String audioInput, String videoOutput) {
+		int audioInputLength = VamixProcesses.probeDuration(audioInput);
+		int mediaPlayerLength = (int)mediaPlayer.getLength() / 1000;
+		
+		System.out.println(audioInput);
+		System.out.println(audioInputLength);
+		System.out.println(mediaPlayerLength);
+		
 		ProgressMonitor monitor = new ProgressMonitor(null, "Replacing audio has started",
-				"In progress..", 0, 100);
+				"In progress..", 0, Math.max(audioInputLength, mediaPlayerLength));
 
 		AudioReplaceWorker worker = new AudioReplaceWorker(videoInput, audioInput, videoOutput, monitor);
 		worker.execute();

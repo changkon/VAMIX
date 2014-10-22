@@ -24,26 +24,26 @@ public class SkipWorker extends SwingWorker<Void, Integer> {
 	private EmbeddedMediaPlayer mediaPlayer;
 	private PlaybackPanel playbackPanel;
 	private MediaSetting mediaSetting;
-	
+
 	public SkipWorker(Playback mode, EmbeddedMediaPlayer mediaPlayer, PlaybackPanel playbackPanel) {
 		this.mode = mode;
 		this.mediaPlayer = mediaPlayer;
 		this.playbackPanel = playbackPanel;
 		mediaSetting = MediaSetting.getInstance();
 	}
-	
+
 	@Override
 	protected Void doInBackground() throws Exception {
 		while(!isCancelled()) {
 			switch(mode) {
-				case FASTFORWARD:
-					mediaPlayer.skip(mediaSetting.getSkipTime());
-					break;
-				case REWIND:
-					mediaPlayer.skip(-mediaSetting.getSkipTime());
-					break;
-				default:
-					break;
+			case FASTFORWARD:
+				mediaPlayer.skip(mediaSetting.getSkipTime());
+				break;
+			case REWIND:
+				mediaPlayer.skip(-mediaSetting.getSkipTime());
+				break;
+			default:
+				break;
 			}
 			publish((int)mediaPlayer.getTime());
 			Thread.sleep(725); // arbitrary value. tested and thought this value is good.
@@ -52,10 +52,12 @@ public class SkipWorker extends SwingWorker<Void, Integer> {
 	}
 
 	@Override
-	protected void process(List<Integer> chunks){
+	protected void process(List<Integer> chunks) {
 		for (Integer i: chunks){
-			playbackPanel.timeSlider.setValue(i);
-			playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(i.longValue()));
+			if (i.longValue() <= mediaPlayer.getLength()) {
+				playbackPanel.timeSlider.setValue(i);
+				playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(i.longValue()));
+			}
 		}
 	}
 }

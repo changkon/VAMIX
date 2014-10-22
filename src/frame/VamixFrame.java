@@ -14,6 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import operation.VamixProcesses;
 import panel.DownloadPanel;
 import panel.MainPanel;
 import panel.MediaPanel;
@@ -141,6 +142,8 @@ public class VamixFrame extends JFrame implements ActionListener {
 			public void run() {
 				VamixFrame vamixFrame = new VamixFrame();
 				vamixFrame.setVisible(true);
+				
+				System.out.println(VamixProcesses.probeDuration("/home/changkon/Videos/rajonrondo.mp4"));
 			}
 			
 		});
