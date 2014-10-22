@@ -1,5 +1,8 @@
 package worker;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import javax.swing.ProgressMonitor;
 
 import res.FilterColor;
@@ -15,16 +18,14 @@ public class FilterSaveWorker extends DefaultWorker {
 	private FilterFont openingFont, closingFont;
 	private int openingFontSize, closingFontSize, filterOpeningLength, filterClosingLength, lastSeconds;
 	private FilterColor openingFontColor, closingFontColor;
+	private ArrayList<String> textList;
 	
-	public FilterSaveWorker(String inputFile, String outputFile, String openingText, String closingText, String openingX, String closingX, String openingY, String closingY, FilterFont openingFont, 
-			FilterFont closingFont, int openingFontSize, int closingFontSize, FilterColor openingFontColor, FilterColor closingFontColor, ProgressMonitor monitor, int lengthOfVideo) {
+	public FilterSaveWorker(String inputFile, String outputFile, ArrayList<String> textList, ProgressMonitor monitor) {
 		
 		super(monitor);
 		
 		this.inputFile = inputFile;
 		this.outputFile = outputFile;
-		this.openingText = openingText;
-		this.closingText = closingText;
 		
 		// Set openingX/openingY and closingX/closingY. If the value is empty, give it determined values.
 		if (openingX.equals("")) {
@@ -51,13 +52,7 @@ public class FilterSaveWorker extends DefaultWorker {
 			this.closingY = closingY;
 		}		
 		
-		
-		this.openingFont = openingFont;
-		this.closingFont = closingFont;
-		this.openingFontSize = openingFontSize;
-		this.closingFontSize = closingFontSize;
-		this.openingFontColor = openingFontColor;
-		this.closingFontColor = closingFontColor;
+		this.textList = textList;
 		
 		filterOpeningLength = MediaSetting.getInstance().getOpeningFilterLength();
 		filterClosingLength = MediaSetting.getInstance().getClosingFilterLength();
@@ -71,35 +66,29 @@ public class FilterSaveWorker extends DefaultWorker {
 		//detects the number of seconds to display for and what to display
 		StringBuilder command = new StringBuilder("avconv -i \'" + inputFile + "\' -c:a copy -vf ");
 		
-		boolean hasOpeningText = !openingText.equals("");
-		boolean hasClosingText = !closingText.equals("");
-		
 		command.append("drawtext=\"fontfile=");
 		
-		//if there is opening and closing
-		if (hasOpeningText && hasClosingText) {
-			command.append(getOpeningCommand());
-			command.append(":,drawtext=fontfile=");
-			command.append(getClosingCommand());
-		} else if (hasOpeningText) { //if there only is opening
-			command.append(getOpeningCommand());
-		} else {//if there is only closing 
-			command.append(getClosingCommand());
+		for (Iterator<String> iter = textList.iterator(); iter.hasNext();) {
+			String i = iter.next();
+			// Arbitrary text pattern
+			String[] splitText = i.split(",::,");
+			
+			command.append(splitText[0] + ": fontsize=");
+			command.append(splitText[1] + ": fontcolor=");
+			command.append(splitText[2] + ": x=");
+			command.append(splitText[3] + ": y=");
+			command.append(splitText[4] + ": text=\'");
+			command.append(splitText[5] + "\': draw=\'lt(t,");
+			command.append(splitText[6] + ")\'");
+			
+			if (iter.hasNext()) {
+				command.append(":,drawtext=fontfile=");
+			}
 		}
 		
 		command.append("\" -y \'" + outputFile + "\'");
 
 		return command.toString();
-	}
-
-	private String getOpeningCommand() {
-		return openingFont.getPath() + ": fontsize=" + openingFontSize + ": fontcolor=" + openingFontColor.toString() + ": x=" + openingX + ": y=" 
-				+ openingY + ": text=\'" + openingText + "\': draw=\'lt(t," + filterOpeningLength + ")\'";
-	}
-	
-	private String getClosingCommand() {
-		return closingFont.getPath() + ": fontsize=" + closingFontSize + ": fontcolor=" + closingFontColor.toString() + ": x=" + closingX + 
-				": y=" + closingY + ": text=\'" + closingText + "\': draw=\'gt(t," + lastSeconds + ")\'";
 	}
 	
 	@Override

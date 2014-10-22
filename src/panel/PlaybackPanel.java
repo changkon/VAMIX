@@ -348,7 +348,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {
 				// Start files from the start.
 				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
-				FilterPanel.getInstance().checkLog(selectedFile.toString());
+//				FilterPanel.getInstance().checkLog(selectedFile.toString());
 			} else {
 				JOptionPane.showMessageDialog(null, "Not a valid media file! Please choose another file.");
 			}

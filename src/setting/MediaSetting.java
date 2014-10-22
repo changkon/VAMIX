@@ -7,6 +7,7 @@ package setting;
 public class MediaSetting {
 	private static MediaSetting theInstance = null;
 	private long skipTime;
+	private int textEditMaxWords;
 	
 	private final static int DEFAULT_OPENING_CLOSING_LENGTH = 10;
 	
@@ -24,6 +25,7 @@ public class MediaSetting {
 		skipTime = 5000;
 		openingFilterLength = 10;
 		closingFilterLength = 10;
+		textEditMaxWords = 20;
 	}
 	
 	public long getSkipTime() {
@@ -32,6 +34,14 @@ public class MediaSetting {
 	
 	public void setSkipTime(long time) {
 		skipTime = time;
+	}
+	
+	public int getTextEditMaxWords() {
+		return textEditMaxWords;
+	}
+	
+	public void setTextEditMaxWords(int max) {
+		textEditMaxWords = max;
 	}
 	
 	/**
