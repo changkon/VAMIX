@@ -23,9 +23,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
+import operation.AudioFileSelection;
 import operation.FileSelection;
 import operation.MediaTimer;
 import operation.VamixProcesses;
+import operation.VideoFileSelection;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioReplaceWorker;
@@ -70,6 +72,8 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private JPanel pageNavigationPanel = new JPanel(new MigLayout());
 	private JButton rightButton;
 	
+	private FileSelection audioFileSelection, videoFileSelection;
+	
 	public static AudioFirstPagePanel getInstance() {
 		if (theInstance == null) {
 			theInstance = new AudioFirstPagePanel();
@@ -87,6 +91,9 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		setAudioReplacePanel();
 		setAudioOverlayPanel();
 		setPageNavigationPanel();
+		
+		audioFileSelection = new AudioFileSelection();
+		videoFileSelection = new VideoFileSelection();
 		
 		addListeners();
 
@@ -212,7 +219,8 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == extractButton) {
 			if (validateTime(startTimeInput.getText()) && validateTime(lengthInput.getText()) && VamixProcesses.validateMediaWithAudioTrack(mediaPlayer)) {
-				String outputFilename = FileSelection.getOutputAudioFilename();
+				
+				String outputFilename = audioFileSelection.getOutputFilename();
 
 				if (outputFilename != null) {
 					executeExtract(VamixProcesses.getFilename(mediaPlayer.mrl()), outputFilename, startTimeInput.getText(), lengthInput.getText());
@@ -221,7 +229,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == extractFullButton) {
 			if (VamixProcesses.validateMediaWithAudioTrack(mediaPlayer)) {
-				String outputFilename = FileSelection.getOutputAudioFilename();
+				String outputFilename = audioFileSelection.getOutputFilename();
 
 				if (outputFilename != null) {
 
@@ -237,7 +245,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 				}
 			}
 		} else if (e.getSource() == selectAudioReplaceFileButton) {
-			String filename = FileSelection.getInputAudioFilename();
+			String filename = audioFileSelection.getInputFilename();
 
 			if (filename != null) {
 				selectedAudioReplaceFileTextField.setText(filename);
@@ -248,14 +256,14 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 				File audioFile = new File(selectedAudioReplaceFileTextField.getText());
 
 				String audioPath = audioFile.getAbsolutePath();
-				String videoPath = FileSelection.getOutputVideoFilename();
+				String videoPath = audioFileSelection.getInputFilename();
 
 				if (videoPath != null) {
 					executeReplace(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
 				}
 			}
 		} else if (e.getSource() ==  selectAudioOverlayFileButton) {
-			String filename = FileSelection.getInputAudioFilename();
+			String filename = audioFileSelection.getInputFilename();
 
 			if (filename != null) {
 				selectedAudioOverlayFileTextField.setText(filename);
@@ -269,7 +277,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 				String audioPath = audioFile.getAbsolutePath();
 
-				String videoPath = FileSelection.getOutputVideoFilename();
+				String videoPath = videoFileSelection.getOutputFilename();
 
 				if (videoPath != null) {
 					executeOverlay(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);

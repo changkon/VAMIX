@@ -25,8 +25,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
+import operation.AudioFileSelection;
 import operation.FileSelection;
 import operation.VamixProcesses;
+import operation.VideoFileSelection;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioTrackWorker;
@@ -61,6 +63,8 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	private JSpinner audioVolumeSpinner;
 	private JButton audioVolumeButton = new JButton("Change Volume");
 	
+	private FileSelection audioFileSelection, videoFileSelection;
+	
 	public static AudioSecondPagePanel getInstance() {
 		if (theInstance == null) {
 			theInstance = new AudioSecondPagePanel();
@@ -79,6 +83,9 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 		setAudioTrackPanel();
 		setPageNavigationPanel();
 
+		audioFileSelection = new AudioFileSelection();
+		videoFileSelection = new VideoFileSelection();
+		
 		add(audioVolumePanel, "pushx, growx, wrap 0px");
 		add(audioTrackPanel, "pushx, growx, wrap 0px");
 		add(pageNavigationPanel, "south");
@@ -173,14 +180,14 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 				
 				// Check if media player file is video or audio and call appropriate JFileChooser.
 				if (VamixProcesses.validContentType(FileType.VIDEO, absolutePath)) {
-					String outputVideoFilename = FileSelection.getOutputVideoFilename();
+					String outputVideoFilename = videoFileSelection.getOutputFilename();
 					
 					if (outputVideoFilename != null) {
 						executeAudioVolumeChange(absolutePath, outputVideoFilename);
 					}
 					
 				} else if (VamixProcesses.validContentType(FileType.AUDIO, absolutePath)) {
-					String outputAudioFilename = FileSelection.getOutputAudioFilename();
+					String outputAudioFilename = audioFileSelection.getOutputFilename();
 					
 					if (outputAudioFilename != null) {
 						executeAudioVolumeChange(absolutePath, outputAudioFilename);
@@ -193,7 +200,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == selectAudioTrackFileButton) {
 			
-			String filename = FileSelection.getInputAudioFilename();
+			String filename = audioFileSelection.getInputFilename();
 
 			if (filename != null) {
 				selectedAudioTrackFileTextField.setText(filename);
@@ -205,7 +212,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 				File audioFile = new File(selectedAudioTrackFileTextField.getText());
 
 				String audioPath = audioFile.getAbsolutePath();
-				String videoPath = FileSelection.getOutputVideoFilename();
+				String videoPath = videoFileSelection.getOutputFilename();
 
 				if (videoPath != null) {
 					executeAudioTrack(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);

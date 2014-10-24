@@ -21,8 +21,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 
 import net.miginfocom.swing.MigLayout;
+import operation.AudioFileSelection;
 import operation.FileSelection;
 import operation.VamixProcesses;
+import operation.VideoFileSelection;
 import res.FilterColor;
 import res.FilterFont;
 import setting.MediaSetting;
@@ -48,8 +50,6 @@ public class FilterPanel extends JPanel implements ActionListener {
 	private JTable table;
 	
 	private Integer[] fontSizeSelection = {10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40};
-	private String[] timeLengthSelection = {"1 second","2 seconds","3 seconds","4 seconds","5 seconds",
-			"6 seconds", "7 seconds", "8 seconds", "9 seconds", "10 seconds"};
 	
 	private JComboBox<FilterFont> fontCombo;
 	private JComboBox<Integer> fontSizeCombo;
@@ -64,6 +64,8 @@ public class FilterPanel extends JPanel implements ActionListener {
 	private JButton previewButton, saveButton;
 
 	private EmbeddedMediaPlayer mediaPlayer;
+	
+	private FileSelection audioFileSelection, videoFileSelection;
 	
 	public static FilterPanel getInstance() {
 		if (theInstance == null) {
@@ -91,8 +93,6 @@ public class FilterPanel extends JPanel implements ActionListener {
 		fontColorCombo = new JComboBox<FilterColor>(FilterColor.values());
 		fontSizeCombo = new JComboBox<Integer>(fontSizeSelection);
 		
-		timeLength = new JComboBox<String>(timeLengthSelection);
-		
 		xLabel = new JLabel("x:");
 		yLabel = new JLabel("y:");
 		
@@ -104,6 +104,9 @@ public class FilterPanel extends JPanel implements ActionListener {
 		saveButton = new JButton("Save Video");
 		
 		textLabel = new JLabel("<html>Text (" + maxWords + " words max for each selection). <br/>X and Y co ordinates for the video is optional</html>");
+		
+		audioFileSelection = new AudioFileSelection();
+		videoFileSelection = new VideoFileSelection();
 		
 		setOptionPanel();
 		setTablePanel();
@@ -196,7 +199,7 @@ public class FilterPanel extends JPanel implements ActionListener {
 			textArea.setForeground(((FilterColor)fontColorCombo.getSelectedItem()).getColor());
 		} else if (e.getSource() == saveButton) {
 			if (verifyInput()) {
-				String outputFilename = FileSelection.getOutputVideoFilename();
+				String outputFilename = videoFileSelection.getOutputFilename();
 				
 				if (outputFilename != null) {
 //					executeFilterSave(outputFilename);

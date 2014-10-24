@@ -24,6 +24,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
+import operation.AudioFileSelection;
 import operation.FileSelection;
 import res.MediaIcon;
 import worker.DownloadWorker;
@@ -173,7 +174,8 @@ public class DownloadPanel extends JPanel implements ActionListener {
 				return;
 			}
 			
-			String filename = FileSelection.getOutputAudioFilename();
+			FileSelection audioFileSelection = new AudioFileSelection();
+			String filename = audioFileSelection.getOutputFilename();
 			
 			if (filename != null) {
 				executeDownload(url, filename);

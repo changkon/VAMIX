@@ -3,6 +3,7 @@ package operation;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -16,19 +17,34 @@ import component.FileType;
  *
  */
 
-public class FileSelection {
+public abstract class FileSelection {
+	
+	protected ArrayList<String[]> inputFilterList, outputFilterList;
+	protected FileType fileType;
+	protected String warningMessage;
+	
+	public FileSelection(ArrayList<String[]> inputFilterList, ArrayList<String[]> outputFilterList, FileType fileType, String warningMessage) {
+		this.inputFilterList = inputFilterList;
+		this.outputFilterList = outputFilterList;
+		this.fileType = fileType;
+		this.warningMessage = warningMessage;
+	}
+	
 	/**
-	 * Returns the selected audio (mp3) file from JFileChooser.
-	 * @return String
+	 * Returns the selected file.
+	 * @return file of specific type
 	 */
-
-	public static String getInputAudioFilename() {
+	
+	public String getInputFilename() {
 		JFileChooser chooser = new JFileChooser();
 
 		// Removes the accept all filter.
 		chooser.setAcceptAllFileFilterUsed(false);
-		// Adds mp3 as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MPEG/mp3", "mp3"));
+		
+		// Adds appropriate filters to filechooser.
+		for (String[] element : inputFilterList) {
+			chooser.addChoosableFileFilter(new FileNameExtensionFilter(element[0], element[1]));
+		}
 		
 		int selection = chooser.showOpenDialog(null);
 
@@ -38,11 +54,10 @@ public class FileSelection {
 			String inputFilename = saveFile.getAbsolutePath();
 
 			// Checks that the audio file is an audio file or else it displays an error message.
-			if (!VamixProcesses.validContentType(FileType.AUDIO, inputFilename)) {
-				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid audio file.");
+			if (!VamixProcesses.validContentType(fileType, inputFilename)) {
+				JOptionPane.showMessageDialog(null, inputFilename + warningMessage);
 				return null;
 			}
-
 
 			return inputFilename;
 		}
@@ -50,18 +65,20 @@ public class FileSelection {
 	}
 	
 	/**
-	 * Returns the output filename of the audio(mp3). Asks user if overwrite is desired if same file exists. </br>
+	 * Returns the output filename. Asks user if overwrite is desired if same file exists. </br>
 	 * Returns null if user cancels selection or does not want to overwrite.
 	 * @return String
 	 */
 
-	public static String getOutputAudioFilename() {
+	public String getOutputFilename() {
 		JFileChooser chooser = new JFileChooser();
 
 		// Removes the accept all filter.
 		chooser.setAcceptAllFileFilterUsed(false);
-		// Adds mp3 as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MPEG/mp3", "mp3"));
+		
+		for (String[] element : outputFilterList) {
+			chooser.addChoosableFileFilter(new FileNameExtensionFilter(element[0], element[1]));	
+		}
 		
 		int selection = chooser.showSaveDialog(null);
 
@@ -76,9 +93,12 @@ public class FileSelection {
 			 * makes sure that when I add extension type to the filename, I only add .mp3 if it's not already there.
 			 * 
 			 */
-
-			if (extensionType.contains("MPEG/mp3") && !saveFile.getAbsolutePath().contains(".mp3")) {
-				outputFilename = outputFilename + ".mp3";
+			
+			for (String[] element : outputFilterList) {
+				if (extensionType.contains(element[0]) && !saveFile.getAbsolutePath().contains(element[1])) {
+					outputFilename = outputFilename + element[1];
+					break;
+				}
 			}
 
 			// Checks to see if the filename the user wants to save already exists so it asks if it wants to overwrite or not.
@@ -98,177 +118,12 @@ public class FileSelection {
 		return null;
 	}
 	
-	/**
-	 * Returns the selected video file from JFileChooser.
-	 * @return String
-	 */
-	
-	public static String getInputVideoFilename() {
-		JFileChooser chooser = new JFileChooser();
-		
-		// Removes the accept all filter.
-		chooser.setAcceptAllFileFilterUsed(false);
-		// Adds mp4 as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MPEG-4", "mp4"));
-		// Adds avi as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Audio Video Interleaved/avi", "avi"));
-		// Adds mkv as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Matroska/mkv", "mkv"));
-
-		int selection = chooser.showOpenDialog(null);
-
-		if (selection == JFileChooser.APPROVE_OPTION) {
-			File saveFile = chooser.getSelectedFile();
-
-			String inputFilename = saveFile.getAbsolutePath();
-
-			// Checks that the video file is an video file or else it displays an error message.
-			if (!VamixProcesses.validContentType(FileType.VIDEO, inputFilename)) {
-				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid video file.");
-				return null;
-			}
-
-
-			return inputFilename;
-		}
-		return null;
+	protected void setInputFilterList(ArrayList<String[]> inputFilterList) {
+		this.inputFilterList = inputFilterList;
 	}
 	
-	/**
-	 * Returns the output filename of the video. Asks user if overwrite is desired if same file exists. </br>
-	 * If the user cancels or the user does not want to overwrite, it returns null.
-	 * @return String
-	 */
-	
-	public static String getOutputVideoFilename() {
-		JFileChooser chooser = new JFileChooser();
-
-		// Removes the accept all filter.
-		chooser.setAcceptAllFileFilterUsed(false);
-		// Adds mp4 as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MPEG-4", "mp4"));
-		// Adds avi as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Audio Video Interleaved/avi", "avi"));
-		// Adds mkv as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Matroska/mkv", "mkv"));
-
-		int selection = chooser.showSaveDialog(null);
-
-		if (selection == JOptionPane.OK_OPTION) {
-			File saveFile = chooser.getSelectedFile();
-			String outputFilename = saveFile.getAbsolutePath();
-
-			String extensionType = chooser.getFileFilter().getDescription();
-
-			/*
-			 * Even though the extension type is listed below, sometimes users still add .mp4 to the end of the file so this
-			 * makes sure that when I add extension type to the filename, I only add .mp4 if it's not already there.
-			 * 
-			 * Compatible with other filters.
-			 */
-
-			if (extensionType.contains("MPEG-4") && !saveFile.getAbsolutePath().contains(".mp4")) {
-				outputFilename = outputFilename + ".mp4";
-			} else if (extensionType.contains("Audio Video Interleaved/avi") && !saveFile.getAbsolutePath().contains(".avi")) {
-				outputFilename = outputFilename + ".avi";
-			} else if (extensionType.contains("Matroska/mkv") && !saveFile.getAbsolutePath().contains(".mkv")) {
-				outputFilename = outputFilename + ".mkv";
-			}
-
-			// Checks to see if the filename the user wants to save already exists so it asks if it wants to overwrite or not.
-			if (Files.exists(Paths.get(outputFilename))) {
-				int overwriteSelection = JOptionPane.showConfirmDialog(null, "File already exists, do you want to overwrite?",
-						"Select an option", JOptionPane.YES_NO_OPTION);
-
-				// Overwrite if yes.
-				if (overwriteSelection == JOptionPane.OK_OPTION) {
-					return outputFilename;
-				}
-			} else {
-				return outputFilename;
-			}
-		}
-		
-		return null;
+	protected void setOutputFilterList(ArrayList<String[]> outputFilterList) {
+		this.outputFilterList = outputFilterList;
 	}
 	
-	/**
-	 * Returns the selected subtitle (srt) file from JFileChooser.
-	 * @return String
-	 */
-	
-	public static String getInputSubtitleFilename() {
-		JFileChooser chooser = new JFileChooser();
-
-		// Removes the accept all filter.
-		chooser.setAcceptAllFileFilterUsed(false);
-		// Adds srt as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SubRip Text", "srt"));
-		
-		int selection = chooser.showOpenDialog(null);
-
-		if (selection == JFileChooser.APPROVE_OPTION) {
-			File saveFile = chooser.getSelectedFile();
-
-			String inputFilename = saveFile.getAbsolutePath();
-
-			// Checks that the audio file is an audio file or else it displays an error message.
-			if (!VamixProcesses.validContentType(FileType.SUBTITLE, inputFilename)) {
-				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid subtitle file.");
-				return null;
-			}
-
-			return inputFilename;
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns the output filename of the subtitle(srt). Asks user if overwrite is desired if same file exists. </br>
-	 * Returns null if user cancels selection or does not want to overwrite.
-	 * @return String
-	 */
-
-	public static String getOutputSubtitleFilename() {
-		JFileChooser chooser = new JFileChooser();
-
-		// Removes the accept all filter.
-		chooser.setAcceptAllFileFilterUsed(false);
-		// Adds mp3 as filter.
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SubRip Text", "srt"));
-		
-		int selection = chooser.showSaveDialog(null);
-
-		if (selection == JFileChooser.APPROVE_OPTION) {
-			File saveFile = chooser.getSelectedFile();
-
-			String extensionType = chooser.getFileFilter().getDescription();
-			String outputFilename = saveFile.getAbsolutePath();
-
-			/*
-			 * Even though the extension type is listed below, sometimes users still add .mp3 to the end of the file so this
-			 * makes sure that when I add extension type to the filename, I only add .mp3 if it's not already there.
-			 * 
-			 */
-
-			if (extensionType.contains("SubRip Text") && !saveFile.getAbsolutePath().contains(".srt")) {
-				outputFilename = outputFilename + ".srt";
-			}
-
-			// Checks to see if the filename the user wants to save already exists so it asks if it wants to overwrite or not.
-			if (Files.exists(Paths.get(outputFilename))) {
-				int overwriteSelection = JOptionPane.showConfirmDialog(null, "File already exists, do you want to overwrite?",
-						"Select an option", JOptionPane.YES_NO_OPTION);
-
-				// Overwrite if yes.
-				if (overwriteSelection == JOptionPane.OK_OPTION) {
-					return outputFilename;
-				}
-			} else {
-				return outputFilename;
-			}
-		}
-
-		return null;
-	}
 }

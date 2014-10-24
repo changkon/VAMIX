@@ -33,6 +33,7 @@ import javax.swing.table.DefaultTableModel;
 import net.miginfocom.swing.MigLayout;
 import operation.FileSelection;
 import operation.MediaTimer;
+import operation.SubtitleFileSelection;
 
 @SuppressWarnings("serial")
 public class SubtitlePanel extends JPanel implements ActionListener {
@@ -58,6 +59,8 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private int rowToEdit;
 	
+	private FileSelection subtitleFileSelection;
+	
 	public static SubtitlePanel getInstance() {
 		if (theInstance == null) {
 			theInstance = new SubtitlePanel();
@@ -71,6 +74,8 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		setMenuPanel();
 		setTablePanel();
 
+		subtitleFileSelection = new SubtitleFileSelection();
+		
 		add(menuPanel);
 		add(tablePanel);
 
@@ -200,7 +205,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == importButton) {
-			String inputFilename = FileSelection.getInputSubtitleFilename();
+			String inputFilename = subtitleFileSelection.getInputFilename();
 
 			if (inputFilename != null) {
 				addData(inputFilename);
@@ -258,7 +263,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 				model.removeRow(selection);
 			}
 		} else if (e.getSource() == saveButton) {
-			String saveFilename = FileSelection.getOutputSubtitleFilename();
+			String saveFilename = subtitleFileSelection.getOutputFilename();
 			
 			if (saveFilename != null) {
 				saveSubtitle(saveFilename);
