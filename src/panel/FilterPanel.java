@@ -13,14 +13,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.DocumentFilter;
 
 import net.miginfocom.swing.MigLayout;
 import operation.FileSelection;
@@ -30,7 +28,9 @@ import res.FilterFont;
 import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
-import component.MediaType;
+import component.FileType;
+import component.MyStyledDocument;
+import component.MyTextFieldFilter;
 
 /**
  * Singleton design pattern. Panel contains anything related to filter editing of video.
@@ -42,9 +42,10 @@ public class FilterPanel extends JPanel implements ActionListener {
 	private static FilterPanel theInstance = null;
 	private TitledBorder title;
 
-	private JPanel optionPanel;
+	private JPanel tablePanel, optionPanel;
 	private JTextArea textArea;
-	private JScrollPane textScroll;
+	private JScrollPane textScroll, tableScroll;
+	private JTable table;
 	
 	private Integer[] fontSizeSelection = {10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40};
 	private String[] timeLengthSelection = {"1 second","2 seconds","3 seconds","4 seconds","5 seconds",
@@ -80,7 +81,9 @@ public class FilterPanel extends JPanel implements ActionListener {
 		int maxWords = MediaSetting.getInstance().getTextEditMaxWords();
 		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 		
-		optionPanel = new JPanel(new MigLayout());
+		optionPanel = new JPanel(new MigLayout("debug"));
+		tablePanel = new JPanel(new MigLayout("debug"));
+		
 		textArea = new JTextArea(new MyStyledDocument(maxWords));
 		textScroll = new JScrollPane(textArea);
 		
@@ -98,31 +101,25 @@ public class FilterPanel extends JPanel implements ActionListener {
 		
 		previewButton = new JButton("Preview");
 		
-		previewButton.setForeground(Color.WHITE);
-		previewButton.setBackground(new Color(183, 183, 183));
-		
-		add(previewButton, "wrap 30px, pushx, align center");
-		
 		saveButton = new JButton("Save Video");
 		
-		textLabel = new JLabel("<html>Text (" + maxWords + " words max for each selection). X and Y <br /> co ordinates for the video is optional</html>");
-		// Sets new font for textLabel.
-		Font font = textLabel.getFont().deriveFont(Font.BOLD + Font.ITALIC, 14f);
-		textLabel.setFont(font);
-
-		add(textLabel, "wrap");
-
-		setTextPanel();
+		textLabel = new JLabel("<html>Text (" + maxWords + " words max for each selection). <br/>X and Y co ordinates for the video is optional</html>");
 		
-		saveButton.setForeground(Color.WHITE);
-		saveButton.setBackground(new Color(255, 106, 106));
+		setOptionPanel();
+		setTablePanel();
 
-		add(saveButton, "split 2, pushx, align center");
-		
+		add(optionPanel, "pushy, growy");
+		add(tablePanel);
 		addListeners();	
 	}
 
-	private void setTextPanel() {
+	private void setOptionPanel() {
+		// Sets new font for textLabel.
+		Font font = textLabel.getFont().deriveFont(Font.BOLD + Font.ITALIC, 14f);
+		textLabel.setFont(font);
+		
+		optionPanel.add(textLabel, "wrap");
+		
 		// Sets filter for textfields.
 		((AbstractDocument)xTextField.getDocument()).setDocumentFilter(new MyTextFieldFilter());
 		((AbstractDocument)yTextField.getDocument()).setDocumentFilter(new MyTextFieldFilter());
@@ -134,16 +131,44 @@ public class FilterPanel extends JPanel implements ActionListener {
 		optionPanel.add(xTextField);
 		optionPanel.add(yLabel);
 		optionPanel.add(yTextField);
-		optionPanel.add(timeLength);
+		optionPanel.add(timeLength, "wrap");
 
-		textScroll.setPreferredSize(new Dimension(400, 200)); // arbitrary value.
+		textScroll.setPreferredSize(new Dimension(375, 100)); // arbitrary value.
 
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 		textArea.setText("Opening Scene Text");
 
-		add(optionPanel, "wrap");
-		add(textScroll);
+		previewButton.setForeground(Color.WHITE);
+		previewButton.setBackground(new Color(183, 183, 183));
+		
+		saveButton.setForeground(Color.WHITE);
+		saveButton.setBackground(new Color(255, 106, 106));
+		
+		optionPanel.add(textScroll, "wrap");
+		optionPanel.add(previewButton, "wrap 30px, pushx, align center");
+		optionPanel.add(saveButton, "split 2, pushx, align center");
+		
+	}
+	
+	private void setTablePanel() {
+		// Override cell editable.
+		DefaultTableModel model = new DefaultTableModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		
+		table = new JTable(model);
+		tableScroll = new JScrollPane(table);
+		
+		model.addColumn("#");
+		model.addColumn("Text");
+		
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+		
+		tablePanel.add(tableScroll);
 	}
 	
 	private void addListeners() {
@@ -244,88 +269,6 @@ public class FilterPanel extends JPanel implements ActionListener {
 //	}
 	
 	/**
-	 * 
-	 * Document which limits amount the amount of words in document. Words are recognised when they are separated by space
-	 *
-	 */
-
-	private class MyStyledDocument extends DefaultStyledDocument {
-		private int maxWords;
-
-		public MyStyledDocument(int maxWords) {
-			this.maxWords = maxWords;
-		}
-
-		// Override insertString method. Only add strings if less than 20 words. Words are counted if they are separated by space.
-		@Override
-		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-			String text = getText(0, getLength());
-			int count = 0;
-
-			for (char c : text.toCharArray()) {
-				if (c == ' ') {
-					count++;
-				}
-			}
-
-			if (count >= maxWords - 1 && str.equals(" ")) {
-				JOptionPane.showMessageDialog(null, "Exceeded word limit!");
-				return;
-			}
-
-			super.insertString(offs, str, a);
-		}
-
-	}
-	
-	/**
-	 * 
-	 * Filtering only numbers
-	 * @see http://stackoverflow.com/questions/9477354/how-to-allow-introducing-only-digits-in-jtextfield
-	 *
-	 */
-
-	private class MyTextFieldFilter extends DocumentFilter {
-
-		// Called when insertString method is called on document. eg textField.getDocument().insertString(..);
-		@Override
-		public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-
-			boolean isDigits = true;
-
-			for(char c : string.toCharArray()) {
-				if (!Character.isDigit(c)) {
-					isDigits = false;
-					break;
-				}
-			}
-
-			if (isDigits) {
-				super.insertString(fb, offset, string, attr);
-			}
-		}
-
-		// Invoked whenever text is input into textfield
-		@Override
-		public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-
-			boolean isDigits = true;
-
-			for(char c : text.toCharArray()) {
-				if (!Character.isDigit(c)) {
-					isDigits = false;
-					break;
-				}
-			}
-
-			if (isDigits) {
-				super.replace(fb, offset, length, text, attrs);
-			}
-		}
-
-	}
-	
-	/**
 	 * Verifies media is parsed. Also makes sure media is a video type.
 	 * @return
 	 */
@@ -341,7 +284,7 @@ public class FilterPanel extends JPanel implements ActionListener {
 		String inputFilename = VamixProcesses.getFilename(mediaPlayer.mrl());
 
 
-		if (!VamixProcesses.validContentType(MediaType.VIDEO, inputFilename)) {
+		if (!VamixProcesses.validContentType(FileType.VIDEO, inputFilename)) {
 			JOptionPane.showMessageDialog(null, "This is not a video file");
 			return false;
 		}

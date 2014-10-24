@@ -30,7 +30,7 @@ import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.SkipWorker;
 
-import component.MediaType;
+import component.FileType;
 import component.Playback;
 
 import frame.FullScreenMediaPlayerFrame;
@@ -345,7 +345,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		if (selection == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = chooser.getSelectedFile();
 			
-			if (VamixProcesses.validContentType(MediaType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(MediaType.AUDIO, selectedFile.getPath())) {
+			if (VamixProcesses.validContentType(FileType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(FileType.AUDIO, selectedFile.getPath())) {
 				// Start files from the start.
 				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
 //				FilterPanel.getInstance().checkLog(selectedFile.toString());

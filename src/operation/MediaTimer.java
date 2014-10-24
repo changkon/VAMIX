@@ -26,6 +26,18 @@ public class MediaTimer {
 	}
 	
 	/**
+	 * Returns the formatted string when given the hours, minutes and seconds.
+	 * @param hours
+	 * @param minutes
+	 * @param seconds
+	 * @return
+	 */
+	
+	public static String getFormattedTime(int hours, int minutes, int seconds) {
+		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+	}
+	
+	/**
 	 * Returns amount of seconds from hh:mm:ss format.
 	 * @param formattedTime
 	 * @return

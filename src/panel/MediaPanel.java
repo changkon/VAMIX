@@ -1,5 +1,7 @@
 package panel;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -24,13 +26,13 @@ public class MediaPanel extends JPanel {
 	}
 	
 	private MediaPanel() {
-		setLayout(new MigLayout());
+		setLayout(new BorderLayout());
 		
 		mediaPlayerComponentPanel = new MediaPlayerComponentPanel();
 		playbackPanel = new PlaybackPanel(mediaPlayerComponentPanel.getMediaPlayer());
 
-		add(mediaPlayerComponentPanel, "push, grow, wrap");
-		add(playbackPanel, "pushx, growx");
+		add(mediaPlayerComponentPanel, BorderLayout.CENTER);
+		add(playbackPanel, BorderLayout.SOUTH);
 	}
 
 	public MediaPlayerComponentPanel getMediaPlayerComponentPanel() {

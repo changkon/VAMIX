@@ -31,7 +31,8 @@ import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioTrackWorker;
 import worker.AudioVolumeChangeWorker;
-import component.MediaType;
+
+import component.FileType;
 import component.Playback;
 
 /**
@@ -171,14 +172,14 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 				String absolutePath = VamixProcesses.getFilename(mediaPlayer.mrl());
 				
 				// Check if media player file is video or audio and call appropriate JFileChooser.
-				if (VamixProcesses.validContentType(MediaType.VIDEO, absolutePath)) {
+				if (VamixProcesses.validContentType(FileType.VIDEO, absolutePath)) {
 					String outputVideoFilename = FileSelection.getOutputVideoFilename();
 					
 					if (outputVideoFilename != null) {
 						executeAudioVolumeChange(absolutePath, outputVideoFilename);
 					}
 					
-				} else if (VamixProcesses.validContentType(MediaType.AUDIO, absolutePath)) {
+				} else if (VamixProcesses.validContentType(FileType.AUDIO, absolutePath)) {
 					String outputAudioFilename = FileSelection.getOutputAudioFilename();
 					
 					if (outputAudioFilename != null) {
@@ -200,7 +201,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 			
 		} else if (e.getSource() == audioTrackButton) {
 			
-			if (VamixProcesses.validateVideoWithAudioTrack(mediaPlayer) && VamixProcesses.validateTextfield(selectedAudioTrackFileTextField.getText(), MediaType.AUDIO)) {
+			if (VamixProcesses.validateVideoWithAudioTrack(mediaPlayer) && VamixProcesses.validateTextfield(selectedAudioTrackFileTextField.getText(), FileType.AUDIO)) {
 				File audioFile = new File(selectedAudioTrackFileTextField.getText());
 
 				String audioPath = audioFile.getAbsolutePath();

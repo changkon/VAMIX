@@ -8,7 +8,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import component.MediaType;
+import component.FileType;
 
 /**
  * Class which deals with returning and getting strings of file selection (audio/video) by JFileChooser.
@@ -38,7 +38,7 @@ public class FileSelection {
 			String inputFilename = saveFile.getAbsolutePath();
 
 			// Checks that the audio file is an audio file or else it displays an error message.
-			if (!VamixProcesses.validContentType(MediaType.AUDIO, inputFilename)) {
+			if (!VamixProcesses.validContentType(FileType.AUDIO, inputFilename)) {
 				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid audio file.");
 				return null;
 			}
@@ -123,7 +123,7 @@ public class FileSelection {
 			String inputFilename = saveFile.getAbsolutePath();
 
 			// Checks that the video file is an video file or else it displays an error message.
-			if (!VamixProcesses.validContentType(MediaType.VIDEO, inputFilename)) {
+			if (!VamixProcesses.validContentType(FileType.VIDEO, inputFilename)) {
 				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid video file.");
 				return null;
 			}
@@ -189,6 +189,86 @@ public class FileSelection {
 			}
 		}
 		
+		return null;
+	}
+	
+	/**
+	 * Returns the selected subtitle (srt) file from JFileChooser.
+	 * @return String
+	 */
+	
+	public static String getInputSubtitleFilename() {
+		JFileChooser chooser = new JFileChooser();
+
+		// Removes the accept all filter.
+		chooser.setAcceptAllFileFilterUsed(false);
+		// Adds srt as filter.
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SubRip Text", "srt"));
+		
+		int selection = chooser.showOpenDialog(null);
+
+		if (selection == JFileChooser.APPROVE_OPTION) {
+			File saveFile = chooser.getSelectedFile();
+
+			String inputFilename = saveFile.getAbsolutePath();
+
+			// Checks that the audio file is an audio file or else it displays an error message.
+			if (!VamixProcesses.validContentType(FileType.SUBTITLE, inputFilename)) {
+				JOptionPane.showMessageDialog(null, inputFilename + " does not refer to a valid subtitle file.");
+				return null;
+			}
+
+			return inputFilename;
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the output filename of the subtitle(srt). Asks user if overwrite is desired if same file exists. </br>
+	 * Returns null if user cancels selection or does not want to overwrite.
+	 * @return String
+	 */
+
+	public static String getOutputSubtitleFilename() {
+		JFileChooser chooser = new JFileChooser();
+
+		// Removes the accept all filter.
+		chooser.setAcceptAllFileFilterUsed(false);
+		// Adds mp3 as filter.
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SubRip Text", "srt"));
+		
+		int selection = chooser.showSaveDialog(null);
+
+		if (selection == JFileChooser.APPROVE_OPTION) {
+			File saveFile = chooser.getSelectedFile();
+
+			String extensionType = chooser.getFileFilter().getDescription();
+			String outputFilename = saveFile.getAbsolutePath();
+
+			/*
+			 * Even though the extension type is listed below, sometimes users still add .mp3 to the end of the file so this
+			 * makes sure that when I add extension type to the filename, I only add .mp3 if it's not already there.
+			 * 
+			 */
+
+			if (extensionType.contains("SubRip Text") && !saveFile.getAbsolutePath().contains(".srt")) {
+				outputFilename = outputFilename + ".srt";
+			}
+
+			// Checks to see if the filename the user wants to save already exists so it asks if it wants to overwrite or not.
+			if (Files.exists(Paths.get(outputFilename))) {
+				int overwriteSelection = JOptionPane.showConfirmDialog(null, "File already exists, do you want to overwrite?",
+						"Select an option", JOptionPane.YES_NO_OPTION);
+
+				// Overwrite if yes.
+				if (overwriteSelection == JOptionPane.OK_OPTION) {
+					return outputFilename;
+				}
+			} else {
+				return outputFilename;
+			}
+		}
+
 		return null;
 	}
 }

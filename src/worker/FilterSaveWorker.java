@@ -17,7 +17,6 @@ public class FilterSaveWorker extends DefaultWorker {
 	private String inputFile, outputFile, openingText, closingText, openingX, openingY, closingX, closingY;
 	private FilterFont openingFont, closingFont;
 	private int openingFontSize, closingFontSize, filterOpeningLength, filterClosingLength, lastSeconds;
-	private FilterColor openingFontColor, closingFontColor;
 	private ArrayList<String> textList;
 	
 	public FilterSaveWorker(String inputFile, String outputFile, ArrayList<String> textList, ProgressMonitor monitor) {

@@ -48,9 +48,9 @@ public class MainPanel extends JPanel {
 		setVideoPanels();
 		setAudioPanels();
 		
-		add(mediaPanel, "push, grow");
-		add(videoPanels, "span 1 2, pushy, growy, wrap");
-		add(audioPanels, "pushx, growx");
+		add(mediaPanel, "width 700, height 500");
+		add(videoPanels, "push, grow");
+//		add(audioPanels, "pushx, growx");
 		
 		EmbeddedMediaPlayerComponent mediaPlayerComponent = mediaPanel.getMediaPlayerComponentPanel().getMediaPlayerComponent();
 		
