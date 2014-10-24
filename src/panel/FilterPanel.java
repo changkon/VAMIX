@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
@@ -29,11 +30,15 @@ import res.FilterColor;
 import res.FilterFont;
 import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import worker.FilterSaveWorker;
 
 import component.FileType;
 import component.MyStyledDocument;
 import component.MyTextFieldFilter;
-
+/**
+ * Singleton design pattern. Panel contains anything related to filter editing of video.
+ * 
+ */
 /**
  * Singleton design pattern. Panel contains anything related to filter editing of video.
  * 
@@ -163,6 +168,8 @@ public class FilterPanel extends JPanel implements ActionListener {
 			}
 		};
 		
+		int maxWords = MediaSetting.getInstance().getTextEditMaxWords();
+		
 		table = new JTable(model);
 		tableScroll = new JScrollPane(table);
 		
@@ -172,6 +179,22 @@ public class FilterPanel extends JPanel implements ActionListener {
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		
 		tablePanel.add(tableScroll);
+		
+		saveButton = new JButton("Save Video");
+		
+		textLabel = new JLabel("<html>Text (" + maxWords + " words max for each selection). X and Y <br /> co ordinates for the video is optional</html>");
+		// Sets new font for textLabel.
+		Font font = textLabel.getFont().deriveFont(Font.BOLD + Font.ITALIC, 14f);
+		textLabel.setFont(font);
+
+		add(textLabel, "wrap");
+
+		saveButton.setForeground(Color.WHITE);
+		saveButton.setBackground(new Color(255, 106, 106));
+
+		add(saveButton, "split 2, pushx, align center");
+		
+		addListeners();	
 	}
 	
 	private void addListeners() {
