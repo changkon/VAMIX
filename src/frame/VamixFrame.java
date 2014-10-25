@@ -17,13 +17,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
-import panel.AudioPanel;
+import panel.AudioFilterPanel;
 import panel.DownloadPanel;
-import panel.FilterPanel;
+import panel.FadeFilterPanel;
 import panel.MediaPanel;
 import panel.MediaPlayerComponentPanel;
 import panel.PlaybackPanel;
 import panel.SubtitlePanel;
+import panel.TextEditPanel;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 
 /**
@@ -92,9 +93,10 @@ public class VamixFrame extends JFrame implements ActionListener {
 		// Get all the panels
 		MediaPanel mediaPanel = MediaPanel.getInstance();
 		DownloadPanel downloadPanel = DownloadPanel.getInstance();
-		AudioPanel audioPanel = AudioPanel.getInstance();
-		FilterPanel filterPanel = FilterPanel.getInstance();
+		AudioFilterPanel audioPanel = AudioFilterPanel.getInstance();
+		TextEditPanel textEditPanel = TextEditPanel.getInstance();
 		SubtitlePanel subtitlePanel = SubtitlePanel.getInstance();
+		FadeFilterPanel fadePanel = FadeFilterPanel.getInstance();
 		
 		mediaPlayerComponentPanel = MediaPanel.getInstance().getMediaPlayerComponentPanel();
 		playbackPanel = MediaPanel.getInstance().getPlaybackPanel();
@@ -102,7 +104,8 @@ public class VamixFrame extends JFrame implements ActionListener {
 		tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Download", downloadPanel);
 		tabbedPane.addTab("Audio", audioPanel);
-		tabbedPane.addTab("Filter", filterPanel);
+		tabbedPane.addTab("Fade Filter", fadePanel);
+		tabbedPane.addTab("Text", textEditPanel);
 		tabbedPane.addTab("Subtitle", subtitlePanel);
 		
 		vamixPanel.add(mediaPanel, "width 1000px, height 600px, push, grow");

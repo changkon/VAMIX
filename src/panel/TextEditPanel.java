@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -29,9 +30,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 
 import net.miginfocom.swing.MigLayout;
-import operation.AudioFileSelection;
 import operation.FileSelection;
+import operation.LogSession;
 import operation.MediaTimer;
+import operation.TextFileSelection;
 import operation.VamixProcesses;
 import operation.VideoFileSelection;
 import res.FilterColor;
@@ -55,8 +57,8 @@ import component.RowSort;
  */
 
 @SuppressWarnings("serial")
-public class FilterPanel extends JPanel implements ActionListener {
-	private static FilterPanel theInstance = null;
+public class TextEditPanel extends JPanel implements ActionListener {
+	private static TextEditPanel theInstance = null;
 	private TitledBorder title;
 
 	private JPanel tablePanel, optionPanel, buttonPanel;
@@ -75,26 +77,26 @@ public class FilterPanel extends JPanel implements ActionListener {
 
 	private JTextField xTextField, yTextField;
 
-	private JButton previewButton, saveButton, addButton, editChangeButton, deleteButton, startButton, endButton;
+	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, addButton, editChangeButton, deleteButton, startButton, endButton;
 
 	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
 
 	private EmbeddedMediaPlayer mediaPlayer;
 
-	private FileSelection audioFileSelection, videoFileSelection;
+	private FileSelection videoFileSelection, textFileSelection;
 
 	private String[] EDITCHANGE = {"Edit", "Change"};
 
 	private int rowToEdit;
 
-	public static FilterPanel getInstance() {
+	public static TextEditPanel getInstance() {
 		if (theInstance == null) {
-			theInstance = new FilterPanel();
+			theInstance = new TextEditPanel();
 		}
 		return theInstance;
 	}
 
-	private FilterPanel() {
+	private TextEditPanel() {
 		setLayout(new MigLayout("gap rel 0", "grow"));
 
 		title = BorderFactory.createTitledBorder("Text Editing");
@@ -102,15 +104,15 @@ public class FilterPanel extends JPanel implements ActionListener {
 
 		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 
-		audioFileSelection = new AudioFileSelection();
 		videoFileSelection = new VideoFileSelection();
-
+		textFileSelection = new TextFileSelection();
+		
 		setOptionPanel();
 		setTablePanel();
 		setButtonPanel();
 
 		add(optionPanel, "pushx, growx, wrap");
-		add(tablePanel, "width 375px, height 150px, wrap");
+		add(tablePanel, "pushx, growx, height 200px, wrap");
 		add(buttonPanel, "pushx, growx");
 		addListeners();	
 	}
@@ -235,7 +237,7 @@ public class FilterPanel extends JPanel implements ActionListener {
 				return false;
 			}
 		};
-
+		
 		table = new JTable(model);
 		tableScroll = new JScrollPane(table);
 
@@ -248,7 +250,7 @@ public class FilterPanel extends JPanel implements ActionListener {
 		model.addColumn("x");
 		model.addColumn("y");
 
-		tablePanel.add(tableScroll);	
+		tablePanel.add(tableScroll, "pushx, growx");	
 	}
 
 	private void setButtonPanel() {
@@ -268,11 +270,16 @@ public class FilterPanel extends JPanel implements ActionListener {
 		editChangeButton = new JButton(EDITCHANGE[0]);
 		deleteButton = new JButton("Delete");
 
+		saveWorkButton = new JButton("Save Work");
+		loadWorkButton = new JButton("Load Work");
+		
 		buttonPanel.add(addButton, "split 3, pushx, align center");
 		buttonPanel.add(editChangeButton);
 		buttonPanel.add(deleteButton, "wrap");
-		buttonPanel.add(previewButton, "split 2, pushx, align center");
+		buttonPanel.add(previewButton, "split 4, pushx, align center");
 		buttonPanel.add(saveButton);
+		buttonPanel.add(saveWorkButton);
+		buttonPanel.add(loadWorkButton);
 	}
 
 	private void addListeners() {
@@ -291,9 +298,10 @@ public class FilterPanel extends JPanel implements ActionListener {
 		deleteButton.addActionListener(this);
 		startButton.addActionListener(this);
 		endButton.addActionListener(this);
+		saveWorkButton.addActionListener(this);
+		loadWorkButton.addActionListener(this);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == fontCombo || e.getSource() == fontColorCombo || e.getSource() == fontSizeCombo) {
@@ -337,7 +345,7 @@ public class FilterPanel extends JPanel implements ActionListener {
 		} else if (e.getSource() == editChangeButton) {
 			int selection = table.getSelectedRow();
 			if (selection == -1) {
-				JOptionPane.showMessageDialog(null, "Show text filter to edit");
+				JOptionPane.showMessageDialog(null, "Press text filter to edit");
 			} else {
 				if (editChangeButton.getText().equals(EDITCHANGE[0])) {
 					editChangeButton.setText(EDITCHANGE[1]);
@@ -349,6 +357,8 @@ public class FilterPanel extends JPanel implements ActionListener {
 					deleteButton.setEnabled(false);
 					previewButton.setEnabled(false);
 					saveButton.setEnabled(false);
+					saveWorkButton.setEnabled(false);
+					loadWorkButton.setEnabled(false);
 
 				} else {
 					editChangeButton.setText(EDITCHANGE[0]);
@@ -358,6 +368,8 @@ public class FilterPanel extends JPanel implements ActionListener {
 					deleteButton.setEnabled(true);
 					previewButton.setEnabled(true);
 					saveButton.setEnabled(true);
+					saveWorkButton.setEnabled(true);
+					loadWorkButton.setEnabled(true);
 
 					Object[] data = getFilterData();
 
@@ -391,6 +403,27 @@ public class FilterPanel extends JPanel implements ActionListener {
 				setEndTime(formattedTime);
 			} else {
 				JOptionPane.showMessageDialog(null, "Media must be playing");
+			}
+		} else if (e.getSource() == saveWorkButton) {
+			String outputfilename = textFileSelection.getOutputFilename();
+			
+			if (outputfilename != null) {
+				LogSession.saveLog(outputfilename, "Text Editing", model.getDataVector());
+			}
+			
+		} else if (e.getSource() == loadWorkButton) {
+			String inputFilename = textFileSelection.getInputFilename();
+			
+			if (inputFilename != null) {
+				ArrayList<Object[]> list = LogSession.getLog(inputFilename, "Text Editing");
+				
+				if (list != null) {
+					model.setRowCount(0);
+
+					for (Object[] element : list) {
+						model.addRow(element);
+					}
+				}
 			}
 		}
 	}
@@ -488,6 +521,7 @@ public class FilterPanel extends JPanel implements ActionListener {
 
 		ArrayList<Object[]> textList = new ArrayList<Object[]>();
 		for (Object element : model.getDataVector()) {
+			@SuppressWarnings("rawtypes")
 			Vector v = (Vector)element;
 			textList.add(v.toArray());
 		}

@@ -52,7 +52,7 @@ public class FilterSaveWorker extends DefaultWorker {
 		}
 		
 		command.append("\" -y \'" + outputFile + "\'");
-		System.out.println(command.toString());
+
 		return command.toString();
 	}
 	

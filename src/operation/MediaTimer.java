@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class MediaTimer {
 	
 	/**
-	 * Returns formatted time in hh:mm:ss format.
+	 * Returns formatted time in hh:mm:ss format. Input is in milliseconds
 	 * @param time
 	 * @return
 	 */
@@ -92,6 +92,17 @@ public class MediaTimer {
 	
 	public static int getDifferenceInTimeSeconds(String formattedTime1, String formattedTime2) {
 		return Math.abs(getSeconds(formattedTime1) - getSeconds(formattedTime2));
+	}
+	
+	/**
+	 * Returns the current frame of the video.
+	 * @param videoSeconds
+	 * @param frameRate
+	 * @return
+	 */
+	
+	public static float getCurrentFrame(String formattedTime, float frameRate) {
+		return getSeconds(formattedTime) * frameRate;
 	}
 	
 }

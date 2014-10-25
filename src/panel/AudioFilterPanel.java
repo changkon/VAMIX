@@ -15,8 +15,8 @@ import res.MediaIcon;
 import component.Playback;
 
 @SuppressWarnings("serial")
-public class AudioPanel extends JPanel implements ActionListener {
-	private static AudioPanel theInstance = null;
+public class AudioFilterPanel extends JPanel implements ActionListener {
+	private static AudioFilterPanel theInstance = null;
 	
 	private JPanel contentPanel, buttonPanel, audioFirstPagePanel, audioSecondPagePanel;
 	
@@ -25,14 +25,14 @@ public class AudioPanel extends JPanel implements ActionListener {
 	
 	private JButton leftButton, rightButton;
 	
-	public static AudioPanel getInstance() {
+	public static AudioFilterPanel getInstance() {
 		if (theInstance == null) {
-			theInstance = new AudioPanel();
+			theInstance = new AudioFilterPanel();
 		}
 		return theInstance;
 	}
 	
-	private AudioPanel() {
+	private AudioFilterPanel() {
 		setLayout(new MigLayout());
 		setContentPanel();
 		setButtonPanel();
@@ -58,6 +58,16 @@ public class AudioPanel extends JPanel implements ActionListener {
 		
 		leftButton = new JButton(mediaIcon.getIcon(Playback.LEFT));
 		rightButton = new JButton(mediaIcon.getIcon(Playback.RIGHT));
+		
+		leftButton.setToolTipText("Go to previous page");
+		leftButton.setBorderPainted(false);
+		leftButton.setFocusPainted(false);
+		leftButton.setContentAreaFilled(false);
+		
+		rightButton.setToolTipText("Go to next page");
+		rightButton.setBorderPainted(false);
+		rightButton.setFocusPainted(false);
+		rightButton.setContentAreaFilled(false);
 		
 		buttonPanel.add(leftButton, "align left");
 		buttonPanel.add(rightButton, "push, align right");

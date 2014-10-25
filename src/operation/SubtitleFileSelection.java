@@ -17,7 +17,7 @@ public class SubtitleFileSelection extends FileSelection {
 	}};
 	
 	public SubtitleFileSelection() {
-		super(filterList, filterList, FileType.SUBTITLE, " does not refer to a valid srt file.");
+		super(filterList, filterList, FileType.TEXT, " does not refer to a valid srt file.");
 	}
 	
 	@Override

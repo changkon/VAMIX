@@ -42,7 +42,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private JPanel menuPanel, tablePanel;
 
-	private JButton importButton, startButton, endButton, addButton, editChangeButton, deleteButton, saveButton;
+	private JButton importButton, addButton, editChangeButton, deleteButton, saveButton;
 
 	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
 
@@ -77,7 +77,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 		subtitleFileSelection = new SubtitleFileSelection();
 		
-		add(menuPanel);
+		add(menuPanel, "wrap");
 		add(tablePanel);
 
 		addListeners();
@@ -87,8 +87,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		menuPanel = new JPanel(new MigLayout("debug"));
 
 		importButton = new JButton("Import");
-		startButton = new JButton("Start");
-		endButton = new JButton("End");
 		addButton = new JButton("Add");
 		editChangeButton = new JButton(EDITCHANGE[0]);
 		deleteButton = new JButton("Delete");
@@ -157,18 +155,16 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		p = Pattern.compile("\\d\\d:\\d\\d:\\d\\d");
 
 		menuPanel.add(importButton, "wrap");
-		menuPanel.add(startButton, "split 4");
-		menuPanel.add(startSpinnerHours);
+		menuPanel.add(startSpinnerHours, "split 3");
 		menuPanel.add(startSpinnerMinutes, "gap 0");
 		menuPanel.add(startSpinnerSeconds, "gap 0");
-		menuPanel.add(endButton, "split 4");
-		menuPanel.add(endSpinnerHours);
+		menuPanel.add(endSpinnerHours, "split 3");
 		menuPanel.add(endSpinnerMinutes, "gap 0");
 		menuPanel.add(endSpinnerSeconds, "gap 0, wrap");
-		menuPanel.add(textScroll, "span, push, grow, wrap");
+		menuPanel.add(textScroll, "push, grow, wrap");
 		menuPanel.add(addButton, "span, split 4, align center");
 		menuPanel.add(editChangeButton);
-		menuPanel.add(deleteButton);
+		menuPanel.add(deleteButton, "wrap");
 		menuPanel.add(saveButton);
 	}
 
@@ -195,8 +191,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private void addListeners() {
 		importButton.addActionListener(this);
-		startButton.addActionListener(this);
-		endButton.addActionListener(this);
 		addButton.addActionListener(this);
 		editChangeButton.addActionListener(this);
 		deleteButton.addActionListener(this);

@@ -235,7 +235,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		} else if (e.getSource() == audioOverlayButton) {
 			if (VamixProcesses.validateVideoWithAudioTrack(mediaPlayer) && VamixProcesses.validateTextfield(selectedAudioOverlayFileTextField.getText(), FileType.AUDIO)) {
 				// This assumes that the audio selected is valid. No checking is done.
-				// http://stackoverflow.com/questions/3140992/read-out-time-length-duration-of-an-mp3-song-in-java
 				File audioFile = new File(selectedAudioOverlayFileTextField.getText());
 
 				String audioPath = audioFile.getAbsolutePath();
