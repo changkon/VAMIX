@@ -26,11 +26,8 @@ public class SubtitleFileSelection extends FileSelection {
 		return super.getOutputFilename();
 	}
 
-
-
 	public String getOutputVideoFilename() {
 		setOutputFilterList(outputVideoFilterList);
-		return getOutputFilename();
+		return super.getOutputFilename();
 	}
-	
 }

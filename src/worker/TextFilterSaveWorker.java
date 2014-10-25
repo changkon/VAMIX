@@ -11,11 +11,11 @@ import operation.MediaTimer;
  * Encodes filter options to file. Progress is shown on progress monitor.
  */
 
-public class FilterSaveWorker extends DefaultWorker {
+public class TextFilterSaveWorker extends DefaultWorker {
 	private String inputFile, outputFile;
 	private ArrayList<Object[]> textList;
 	
-	public FilterSaveWorker(String inputFile, String outputFile, ArrayList<Object[]> textList, ProgressMonitor monitor) {
+	public TextFilterSaveWorker(String inputFile, String outputFile, ArrayList<Object[]> textList, ProgressMonitor monitor) {
 		
 		super(monitor);
 		

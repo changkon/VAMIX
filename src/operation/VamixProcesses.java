@@ -232,7 +232,7 @@ public class VamixProcesses {
 	}
 
 	/**
-	 * Returns the directory of the font file in the computer.
+	 * Returns the directory of the font file in the computer. If not found, returns null.
 	 * {@link res.FilterFont}
 	 * @param font
 	 * @return absolute path of Font
@@ -257,7 +257,7 @@ public class VamixProcesses {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return "";
+		return null;
 	}
 	
 }

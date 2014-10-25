@@ -1,5 +1,6 @@
 package panel;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -7,10 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -26,6 +27,8 @@ import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 
@@ -38,14 +41,16 @@ import operation.VamixProcesses;
 import operation.VideoFileSelection;
 import res.FilterColor;
 import res.FilterFont;
+import res.MediaIcon;
 import setting.MediaSetting;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-import worker.FilterPreviewWorker;
-import worker.FilterSaveWorker;
+import worker.TextFilterPreviewWorker;
+import worker.TextFilterSaveWorker;
 
 import component.FileType;
 import component.MyStyledDocument;
 import component.MyTextFieldFilter;
+import component.Playback;
 import component.RowSort;
 /**
  * Singleton design pattern. Panel contains anything related to filter editing of video.
@@ -61,7 +66,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	private static TextEditPanel theInstance = null;
 	private TitledBorder title;
 
-	private JPanel tablePanel, optionPanel, buttonPanel;
+	private JPanel tablePanel, optionPanel, buttonPanel, navigationPanel;
 	private JTextArea textArea;
 	private JScrollPane textScroll, tableScroll;
 	private JTable table;
@@ -77,7 +82,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 
 	private JTextField xTextField, yTextField;
 
-	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, addButton, editChangeButton, deleteButton, startButton, endButton;
+	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, addButton, editChangeButton, deleteButton, startButton, endButton, rightButton;
 
 	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
 
@@ -97,28 +102,30 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	}
 
 	private TextEditPanel() {
-		setLayout(new MigLayout("gap rel 0", "grow"));
+		setLayout(new MigLayout("", "", "[][][]push"));
 
 		title = BorderFactory.createTitledBorder("Text Editing");
-		setBorder(title);	
+		setBorder(title);
 
 		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 
 		videoFileSelection = new VideoFileSelection();
 		textFileSelection = new TextFileSelection();
-		
+
 		setOptionPanel();
 		setTablePanel();
 		setButtonPanel();
-
+		setNavigationPanel();
+		
 		add(optionPanel, "pushx, growx, wrap");
-		add(tablePanel, "pushx, growx, height 200px, wrap");
-		add(buttonPanel, "pushx, growx");
+		add(tablePanel, "pushx, growx, height 300px, wrap");
+		add(buttonPanel, "pushx, growx, wrap");
+		add(navigationPanel, "dock south");
 		addListeners();	
 	}
 
 	private void setOptionPanel() {
-		optionPanel = new JPanel(new MigLayout("debug"));
+		optionPanel = new JPanel(new MigLayout());
 
 		fontCombo = new JComboBox<FilterFont>(FilterFont.values());
 		fontColorCombo = new JComboBox<FilterColor>(FilterColor.values());
@@ -146,13 +153,22 @@ public class TextEditPanel extends JPanel implements ActionListener {
 		textArea.setWrapStyleWord(true);
 		textArea.setText("Opening Scene Text");
 
-		textLabel = new JLabel("<html>Text (" + maxWords + " words max for each selection). X and Y <br /> co ordinates for the video is optional</html>");
+		textLabel = new JLabel("<html>Text (" + maxWords + " words max for each selection).<br/> Choose text style and set X and Y co-ordinates. " + 
+				"The x co-ordinate go from top left to right and y is top to down.</html>");
+
 		// Sets new font for textLabel.
-		Font font = textLabel.getFont().deriveFont(Font.BOLD + Font.ITALIC, 14f);
+		Font font = textLabel.getFont().deriveFont(Font.BOLD, 14f);
 		textLabel.setFont(font);
 
 		startButton = new JButton("Start");
+
+		startButton.setForeground(Color.WHITE);
+		startButton.setBackground(new Color(59, 89, 182)); // blue
+
 		endButton = new JButton("End");
+
+		endButton.setForeground(Color.WHITE);
+		endButton.setBackground(new Color(59, 89, 182)); // blue
 
 		// http://stackoverflow.com/questions/972194/zero-padding-a-spinner-in-java
 		startSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
@@ -208,7 +224,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 			((DefaultEditor)editor).getTextField().setEditable(false);
 		}
 
-		optionPanel.add(textLabel, "wrap");
+		optionPanel.add(textLabel, "wrap 20px");
 		optionPanel.add(fontCombo, "split 3"); // split the cell in 3. this is so 3 components go into same cell
 		optionPanel.add(fontSizeCombo);
 		optionPanel.add(fontColorCombo, "wrap");
@@ -220,7 +236,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 		optionPanel.add(endSpinnerHours);
 		optionPanel.add(endSpinnerMinutes, "gap 0");
 		optionPanel.add(endSpinnerSeconds, "gap 0, wrap");
-		optionPanel.add(xLabel, "split 4"); // split the cell in 5. this is so 5 components go into same cell
+		optionPanel.add(xLabel, "split 4");
 		optionPanel.add(xTextField);
 		optionPanel.add(yLabel);
 		optionPanel.add(yTextField, "wrap");
@@ -228,7 +244,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	}
 
 	private void setTablePanel() {
-		tablePanel = new JPanel(new MigLayout("debug"));
+		tablePanel = new JPanel(new MigLayout());
 
 		// Override cell editable.
 		model = new DefaultTableModel() {
@@ -237,12 +253,13 @@ public class TextEditPanel extends JPanel implements ActionListener {
 				return false;
 			}
 		};
-		
+
 		table = new JTable(model);
+		table.setFillsViewportHeight(true);
 		tableScroll = new JScrollPane(table);
 
-		model.addColumn("Start Time");
-		model.addColumn("End Time");
+		model.addColumn("Start");
+		model.addColumn("End");
 		model.addColumn("Text");
 		model.addColumn("Font");
 		model.addColumn("Size");
@@ -254,37 +271,53 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	}
 
 	private void setButtonPanel() {
-		buttonPanel = new JPanel(new MigLayout("debug"));
+		buttonPanel = new JPanel(new MigLayout());
 
 		previewButton = new JButton("Preview");
-
-		previewButton.setForeground(Color.WHITE);
-		previewButton.setBackground(new Color(183, 183, 183));
+		previewButton.setBackground(new Color(219, 219, 219)); // light grey
 
 		saveButton = new JButton("Save Video");
-
-		saveButton.setForeground(Color.WHITE);
-		saveButton.setBackground(new Color(255, 106, 106));
+		saveButton.setBackground(new Color(219, 219, 219)); // light grey
 
 		addButton = new JButton("Add");
+		addButton.setBackground(new Color(219, 219, 219)); // light grey
+
 		editChangeButton = new JButton(EDITCHANGE[0]);
+		editChangeButton.setBackground(new Color(219, 219, 219)); // light grey
+
 		deleteButton = new JButton("Delete");
+		deleteButton.setBackground(new Color(219, 219, 219)); // light grey
 
 		saveWorkButton = new JButton("Save Work");
+		saveWorkButton.setBackground(new Color(219, 219, 219)); // light grey
+
 		loadWorkButton = new JButton("Load Work");
-		
+		loadWorkButton.setBackground(new Color(219, 219, 219)); // light grey
+
 		buttonPanel.add(addButton, "split 3, pushx, align center");
 		buttonPanel.add(editChangeButton);
-		buttonPanel.add(deleteButton, "wrap");
+		buttonPanel.add(deleteButton, "wrap 20px");
 		buttonPanel.add(previewButton, "split 4, pushx, align center");
 		buttonPanel.add(saveButton);
 		buttonPanel.add(saveWorkButton);
 		buttonPanel.add(loadWorkButton);
 	}
 
+	private void setNavigationPanel() {
+		navigationPanel = new JPanel(new MigLayout());
+		
+		MediaIcon mediaIcon = new MediaIcon(15, 15);
+		rightButton = new JButton(mediaIcon.getIcon(Playback.RIGHT));
+		
+		rightButton.setToolTipText("Go to next page");
+		rightButton.setBorderPainted(false);
+		rightButton.setFocusPainted(false);
+		rightButton.setContentAreaFilled(false);
+		
+		navigationPanel.add(rightButton, "pushx, align right");
+	}
+	
 	private void addListeners() {
-		saveButton.addActionListener(this);
-
 		fontCombo.addActionListener(this);
 		fontSizeCombo.addActionListener(this);
 		fontColorCombo.addActionListener(this);
@@ -292,14 +325,29 @@ public class TextEditPanel extends JPanel implements ActionListener {
 		// Sets the preferred index of font size. It also calls event listener which is important for displaying correct font.
 		fontSizeCombo.setSelectedIndex(3);
 
+		saveButton.addActionListener(this);
 		previewButton.addActionListener(this);
 		addButton.addActionListener(this);
 		editChangeButton.addActionListener(this);
 		deleteButton.addActionListener(this);
-		startButton.addActionListener(this);
-		endButton.addActionListener(this);
 		saveWorkButton.addActionListener(this);
 		loadWorkButton.addActionListener(this);
+		startButton.addActionListener(this);
+		endButton.addActionListener(this);
+		
+		rightButton.addActionListener(this);
+		
+		rightButton.getModel().addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            ButtonModel model = (ButtonModel) e.getSource();
+	            if (model.isRollover()) {
+	            	rightButton.setBorderPainted(true);
+	            } else {
+	            	rightButton.setBorderPainted(false);
+	            }
+	        }
+	    });
 	}
 
 	@Override
@@ -312,47 +360,45 @@ public class TextEditPanel extends JPanel implements ActionListener {
 			textArea.setFont(font);
 			textArea.setForeground(((FilterColor)fontColorCombo.getSelectedItem()).getColor());
 		} else if (e.getSource() == saveButton) {
-			if (verifyInput()) {
+			if (verifyMedia()) {
 				String outputFilename = videoFileSelection.getOutputFilename();
 
 				if (outputFilename != null) {
 					executeFilterSave(outputFilename);
 				}
-
 			}
+
 		} else if (e.getSource() == previewButton) {
-			int selection = table.getSelectedRow();
+			if (verifyMedia()) {
+				int selection = table.getSelectedRow();
 
-			if (selection == -1) {
-				JOptionPane.showMessageDialog(null, "Select text filter to preview");
-			} else {
-
-				FilterPreviewWorker worker = new FilterPreviewWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), getFilterData());
-
-				worker.execute();
-
+				if (selection == -1) {
+					JOptionPane.showMessageDialog(null, "Select text filter to preview");
+				} else {
+					executeFilterPreview();
+				}
 			}
-
 		} else if (e.getSource() == addButton) {
-			Object[] data = getFilterData();
+			if (verifyData()) {
+				Object[] data = getFilterData();
 
-			model.addRow(data);
+				model.addRow(data);
 
-			if (needSorting()) {
-				sortData();
+				if (needSorting()) {
+					sortData();
+				}
 			}
 
 		} else if (e.getSource() == editChangeButton) {
 			int selection = table.getSelectedRow();
 			if (selection == -1) {
-				JOptionPane.showMessageDialog(null, "Press text filter to edit");
+				JOptionPane.showMessageDialog(null, "Select text filter to edit");
 			} else {
 				if (editChangeButton.getText().equals(EDITCHANGE[0])) {
 					editChangeButton.setText(EDITCHANGE[1]);
 
 					rowToEdit = selection;
 
-					table.setRowSelectionAllowed(false);
 					addButton.setEnabled(false);
 					deleteButton.setEnabled(false);
 					previewButton.setEnabled(false);
@@ -361,26 +407,27 @@ public class TextEditPanel extends JPanel implements ActionListener {
 					loadWorkButton.setEnabled(false);
 
 				} else {
-					editChangeButton.setText(EDITCHANGE[0]);
+					if (verifyData()) {
+						editChangeButton.setText(EDITCHANGE[0]);
 
-					table.setRowSelectionAllowed(true);
-					addButton.setEnabled(true);
-					deleteButton.setEnabled(true);
-					previewButton.setEnabled(true);
-					saveButton.setEnabled(true);
-					saveWorkButton.setEnabled(true);
-					loadWorkButton.setEnabled(true);
+						addButton.setEnabled(true);
+						deleteButton.setEnabled(true);
+						previewButton.setEnabled(true);
+						saveButton.setEnabled(true);
+						saveWorkButton.setEnabled(true);
+						loadWorkButton.setEnabled(true);
 
-					Object[] data = getFilterData();
+						Object[] data = getFilterData();
 
-					model.setValueAt(data[0], rowToEdit, 0);
-					model.setValueAt(data[1], rowToEdit, 1);
-					model.setValueAt(data[2], rowToEdit, 2);
-					model.setValueAt(data[3], rowToEdit, 3);
-					model.setValueAt(data[4], rowToEdit, 4);
-					model.setValueAt(data[5], rowToEdit, 5);
-					model.setValueAt(data[6], rowToEdit, 6);
-					model.setValueAt(data[7], rowToEdit, 7);
+						model.setValueAt(data[0], rowToEdit, 0);
+						model.setValueAt(data[1], rowToEdit, 1);
+						model.setValueAt(data[2], rowToEdit, 2);
+						model.setValueAt(data[3], rowToEdit, 3);
+						model.setValueAt(data[4], rowToEdit, 4);
+						model.setValueAt(data[5], rowToEdit, 5);
+						model.setValueAt(data[6], rowToEdit, 6);
+						model.setValueAt(data[7], rowToEdit, 7);
+					}
 				}
 			}
 		} else if (e.getSource() == deleteButton) {
@@ -406,17 +453,17 @@ public class TextEditPanel extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == saveWorkButton) {
 			String outputfilename = textFileSelection.getOutputFilename();
-			
+
 			if (outputfilename != null) {
 				LogSession.saveLog(outputfilename, "Text Editing", model.getDataVector());
 			}
-			
+
 		} else if (e.getSource() == loadWorkButton) {
 			String inputFilename = textFileSelection.getInputFilename();
-			
+
 			if (inputFilename != null) {
 				ArrayList<Object[]> list = LogSession.getLog(inputFilename, "Text Editing");
-				
+
 				if (list != null) {
 					model.setRowCount(0);
 
@@ -425,6 +472,11 @@ public class TextEditPanel extends JPanel implements ActionListener {
 					}
 				}
 			}
+		} else if (e.getSource() == rightButton) {
+			VideoFilterPanel videoFilterPanel = VideoFilterPanel.getInstance();
+			CardLayout card = (CardLayout)videoFilterPanel.getLayout();
+			
+			card.show(videoFilterPanel, videoFilterPanel.FADEFILTERSTRING);
 		}
 	}
 
@@ -517,7 +569,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	private void executeFilterSave(String outputFilename) {
 		int videoLength = (int)(mediaPlayer.getLength() / 1000);
 
-		ProgressMonitor monitor = new ProgressMonitor(null, "Filtering has started", "", 0, videoLength);
+		ProgressMonitor monitor = new ProgressMonitor(null, "Text Filtering has started", "", 0, videoLength);
 
 		ArrayList<Object[]> textList = new ArrayList<Object[]>();
 		for (Object element : model.getDataVector()) {
@@ -526,9 +578,35 @@ public class TextEditPanel extends JPanel implements ActionListener {
 			textList.add(v.toArray());
 		}
 
-
-		FilterSaveWorker worker = new FilterSaveWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), outputFilename, textList, monitor);
+		TextFilterSaveWorker worker = new TextFilterSaveWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), outputFilename, textList, monitor);
 		worker.execute();
+	}
+
+	/**
+	 * Executes FilterPreviewWorker. Previews the selected text edit.
+	 */
+
+	private void executeFilterPreview() {
+		TextFilterPreviewWorker worker = new TextFilterPreviewWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), getFilterData());
+		worker.execute();
+	}
+
+	/**
+	 * Verifies correct information is input before adding to table.
+	 * @return
+	 */
+
+	private boolean verifyData() {
+		String startTime = MediaTimer.getFormattedTime((int)startSpinnerHours.getValue(), (int)startSpinnerMinutes.getValue(), (int)startSpinnerSeconds.getValue());
+		String endTime = MediaTimer.getFormattedTime((int)endSpinnerHours.getValue(), (int)endSpinnerMinutes.getValue(), (int)endSpinnerSeconds.getValue());
+		int difference = MediaTimer.getSeconds(endTime) - MediaTimer.getSeconds(startTime);
+
+		if (!xTextField.getText().equals("") && !yTextField.getText().equals("") && !textArea.getText().equals("") && (difference > 0)) {
+			return true;
+		} else {
+			JOptionPane.showMessageDialog(null, "Please make sure all information is input or check that end time is after start time.");
+			return false;
+		}
 	}
 
 	/**
@@ -536,30 +614,20 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	 * @return
 	 */
 
-	private boolean verifyInput() {
+	private boolean verifyMedia() {
 
 		// If media is not parsed, return false;
 		if (!mediaPlayer.isPlayable()) {
-			JOptionPane.showMessageDialog(null, "Please parse media");
+			JOptionPane.showMessageDialog(null, "Please make sure a media file is playing.");
 			return false;
 		}
 
 		String inputFilename = VamixProcesses.getFilename(mediaPlayer.mrl());
 
-
 		if (!VamixProcesses.validContentType(FileType.VIDEO, inputFilename)) {
 			JOptionPane.showMessageDialog(null, "This is not a video file");
 			return false;
 		}
-
-		String text = textArea.getText();
-
-		// Return false if both textArea are empty
-		if (text.equals("")) {
-			JOptionPane.showMessageDialog(null, "Please input some text to text area");
-			return false;
-		}
-
 
 		return true;
 	}

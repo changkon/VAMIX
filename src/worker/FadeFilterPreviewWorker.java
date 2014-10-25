@@ -34,7 +34,7 @@ public class FadeFilterPreviewWorker extends SwingWorker<Void, Void> {
 		
 		int startSeconds = MediaTimer.getSeconds(data[0].toString());
 		int endSeconds = MediaTimer.getSeconds(data[1].toString());
-		
+
 		String formattedDifference = MediaTimer.getFormattedTime(Math.abs(startSeconds - endSeconds) * 1000);
 		
 		command.append(Math.round(MediaTimer.getCurrentFrame(data[0].toString(), mediaFrameRate)) + ":");

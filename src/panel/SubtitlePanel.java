@@ -1,6 +1,9 @@
 package panel;
 
+import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -17,32 +20,44 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.BorderFactory;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.ProgressMonitor;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
 import operation.FileSelection;
 import operation.MediaTimer;
 import operation.SubtitleFileSelection;
-
+import operation.VamixProcesses;
+import res.MediaIcon;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import worker.SubtitleWorker;
+import component.Playback;
 import component.RowSort;
 
 @SuppressWarnings("serial")
 public class SubtitlePanel extends JPanel implements ActionListener {
 	private static SubtitlePanel theInstance = null;
+	private TitledBorder title;
+	
+	private JPanel menuPanel, tablePanel, buttonPanel, navigationPanel;
 
-	private JPanel menuPanel, tablePanel;
-
-	private JButton importButton, addButton, editChangeButton, deleteButton, saveButton;
+	private JButton importButton, addButton, editChangeButton, deleteButton, startButton, endButton, saveSubtitleButton, addSubtitleToVideoButton, leftButton;
 
 	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
 
@@ -52,6 +67,8 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private JScrollPane textScroll, tableScroll;
 
+	private JLabel subtitleLabel, textLabel;
+	
 	private DefaultTableModel model;
 
 	private final String[] EDITCHANGE = {"Edit", "Change"};
@@ -60,7 +77,9 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private int rowToEdit;
 	
-	private FileSelection subtitleFileSelection;
+	private SubtitleFileSelection subtitleFileSelection;
+	
+	private EmbeddedMediaPlayer mediaPlayer;
 	
 	public static SubtitlePanel getInstance() {
 		if (theInstance == null) {
@@ -70,27 +89,55 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	}
 
 	private SubtitlePanel() {
-		setLayout(new MigLayout());
+		setLayout(new MigLayout("", "", "[][][]push"));
 
+		title = BorderFactory.createTitledBorder("Subtitle");
+		setBorder(title);
+		
+		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
+		
 		setMenuPanel();
 		setTablePanel();
-
+		setButtonPanel();
+		setNavigationPanel();
+		
 		subtitleFileSelection = new SubtitleFileSelection();
 		
-		add(menuPanel, "wrap");
-		add(tablePanel);
+		add(menuPanel, "pushx, growx, wrap");
+		add(tablePanel, "pushx, growx, wrap");
+		add(buttonPanel, "pushx, growx, wrap");
+		add(navigationPanel, "south");
 
 		addListeners();
 	}
 
 	private void setMenuPanel() {
-		menuPanel = new JPanel(new MigLayout("debug"));
+		menuPanel = new JPanel(new MigLayout());
 
+		subtitleLabel = new JLabel("Add desired text to subtitles to add to video.");
+		// Sets new font for subtitleLabel.
+		Font subtitleFont = subtitleLabel.getFont().deriveFont(Font.BOLD, 14f);
+		subtitleLabel.setFont(subtitleFont);
+		
+		textLabel = new JLabel("Put subtitle text in the text box");
+		// Sets new font for textLabel.
+		Font textFont = textLabel.getFont().deriveFont(Font.BOLD, 14f);
+		textLabel.setFont(textFont);
+		
 		importButton = new JButton("Import");
-		addButton = new JButton("Add");
-		editChangeButton = new JButton(EDITCHANGE[0]);
-		deleteButton = new JButton("Delete");
-		saveButton = new JButton("Save");
+		
+		importButton.setForeground(Color.WHITE);
+		importButton.setBackground(new Color(59, 89, 182)); // blue
+		
+		startButton = new JButton("Start");
+		
+		startButton.setForeground(Color.WHITE);
+		startButton.setBackground(new Color(59, 89, 182)); // blue
+		
+		endButton = new JButton("End");
+		
+		endButton.setForeground(Color.WHITE);
+		endButton.setBackground(new Color(59, 89, 182)); // blue
 		
 		// http://stackoverflow.com/questions/972194/zero-padding-a-spinner-in-java
 		startSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
@@ -150,22 +197,22 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 		textScroll = new JScrollPane(textArea);
-		textScroll.setSize(new Dimension(400, 400));
+		textScroll.setPreferredSize(new Dimension(400, 100));
 
 		p = Pattern.compile("\\d\\d:\\d\\d:\\d\\d");
 
+		menuPanel.add(subtitleLabel, "wrap 20px");
 		menuPanel.add(importButton, "wrap");
-		menuPanel.add(startSpinnerHours, "split 3");
+		menuPanel.add(startButton, "split 8");
+		menuPanel.add(startSpinnerHours);
 		menuPanel.add(startSpinnerMinutes, "gap 0");
 		menuPanel.add(startSpinnerSeconds, "gap 0");
-		menuPanel.add(endSpinnerHours, "split 3");
+		menuPanel.add(endButton);
+		menuPanel.add(endSpinnerHours);
 		menuPanel.add(endSpinnerMinutes, "gap 0");
-		menuPanel.add(endSpinnerSeconds, "gap 0, wrap");
+		menuPanel.add(endSpinnerSeconds, "gap 0, wrap 20px");
+		menuPanel.add(textLabel, "wrap");
 		menuPanel.add(textScroll, "push, grow, wrap");
-		menuPanel.add(addButton, "span, split 4, align center");
-		menuPanel.add(editChangeButton);
-		menuPanel.add(deleteButton, "wrap");
-		menuPanel.add(saveButton);
 	}
 
 	private void setTablePanel() {
@@ -180,21 +227,79 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		};
 
 		table = new JTable(model);
+		table.setFillsViewportHeight(true);
 		tableScroll = new JScrollPane(table);
 
 		model.addColumn("Start Time");
 		model.addColumn("End Time");
 		model.addColumn("Text");
 
-		tablePanel.add(tableScroll);
+		tablePanel.add(tableScroll, "pushx, growx");
 	}
 
+	private void setButtonPanel() {
+		buttonPanel = new JPanel(new MigLayout());
+		
+		addButton = new JButton("Add");
+		addButton.setBackground(new Color(219, 219, 219)); // light grey
+		
+		editChangeButton = new JButton(EDITCHANGE[0]);
+		editChangeButton.setBackground(new Color(219, 219, 219)); // light grey
+		
+		deleteButton = new JButton("Delete");
+		deleteButton.setBackground(new Color(219, 219, 219)); // light grey
+		
+		saveSubtitleButton = new JButton("Save Subtitle");
+		saveSubtitleButton.setBackground(new Color(219, 219, 219)); // light grey
+		
+		addSubtitleToVideoButton = new JButton("Add Subtitle to Video");
+		addSubtitleToVideoButton.setBackground(new Color(219, 219, 219)); // light grey
+		
+		buttonPanel.add(addButton, "pushx, split 3, align center");
+		buttonPanel.add(editChangeButton);
+		buttonPanel.add(deleteButton, "wrap 30px");
+		buttonPanel.add(saveSubtitleButton, "split 2, pushx, align center");
+		buttonPanel.add(addSubtitleToVideoButton);
+	}
+	
+	private void setNavigationPanel() {
+		navigationPanel = new JPanel(new MigLayout());
+		
+		MediaIcon mediaIcon = new MediaIcon(15, 15);
+		leftButton = new JButton(mediaIcon.getIcon(Playback.LEFT));
+		
+		leftButton.setToolTipText("Go to previous page");
+		leftButton.setBorderPainted(false);
+		leftButton.setFocusPainted(false);
+		leftButton.setContentAreaFilled(false);
+		
+		navigationPanel.add(leftButton, "pushx, align left");
+	}
+	
 	private void addListeners() {
 		importButton.addActionListener(this);
 		addButton.addActionListener(this);
 		editChangeButton.addActionListener(this);
 		deleteButton.addActionListener(this);
-		saveButton.addActionListener(this);
+		saveSubtitleButton.addActionListener(this);
+		addSubtitleToVideoButton.addActionListener(this);
+		
+		startButton.addActionListener(this);
+		endButton.addActionListener(this);
+		
+		leftButton.addActionListener(this);
+		
+		leftButton.getModel().addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            ButtonModel model = (ButtonModel) e.getSource();
+	            if (model.isRollover()) {
+	            	leftButton.setBorderPainted(true);
+	            } else {
+	            	leftButton.setBorderPainted(false);
+	            }
+	        }
+	    });
 	}
 
 	@Override
@@ -207,12 +312,14 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 			}
 
 		} else if (e.getSource() == addButton) {
-			Object[] data = getSubtitleData();
-
-			model.addRow(data);
-
-			if (needSorting()) {
-				sortData();
+			if (verifyData()) {
+				Object[] data = getSubtitleData();
+	
+				model.addRow(data);
+	
+				if (needSorting()) {
+					sortData();
+				}
 			}
 
 		} else if (e.getSource() == editChangeButton) {
@@ -223,10 +330,11 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 				if (editChangeButton.getText().equals(EDITCHANGE[0])) {
 					editChangeButton.setText(EDITCHANGE[1]);
 					rowToEdit = selection;
-					table.setRowSelectionAllowed(false);
+
 					addButton.setEnabled(false);
 					deleteButton.setEnabled(false);
-					saveButton.setEnabled(false);
+					saveSubtitleButton.setEnabled(false);
+					addSubtitleToVideoButton.setEnabled(false);
 					importButton.setEnabled(false);
 					
 					Object[] values = getVectorValue(model.getDataVector().get(selection));
@@ -236,18 +344,20 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 					textArea.setText(values[2].toString());
 
 				} else {
-					editChangeButton.setText(EDITCHANGE[0]);
-					Object[] data = getSubtitleData();
-					
-					model.setValueAt(data[0], rowToEdit, 0);
-					model.setValueAt(data[1], rowToEdit, 1);
-					model.setValueAt(data[2], rowToEdit, 2);
-					
-					table.setRowSelectionAllowed(true);
-					addButton.setEnabled(true);
-					deleteButton.setEnabled(true);
-					saveButton.setEnabled(true);
-					importButton.setEnabled(true);
+					if (verifyData()) {
+						editChangeButton.setText(EDITCHANGE[0]);
+						Object[] data = getSubtitleData();
+						
+						model.setValueAt(data[0], rowToEdit, 0);
+						model.setValueAt(data[1], rowToEdit, 1);
+						model.setValueAt(data[2], rowToEdit, 2);
+						
+						addButton.setEnabled(true);
+						deleteButton.setEnabled(true);
+						saveSubtitleButton.setEnabled(true);
+						addSubtitleToVideoButton.setEnabled(true);
+						importButton.setEnabled(true);
+					}
 				}
 			}
 		} else if (e.getSource() == deleteButton) {
@@ -257,16 +367,70 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 			} else {
 				model.removeRow(selection);
 			}
-		} else if (e.getSource() == saveButton) {
+		} else if (e.getSource() == saveSubtitleButton) {
 			String saveFilename = subtitleFileSelection.getOutputFilename();
 			
 			if (saveFilename != null) {
 				saveSubtitle(saveFilename);
 			}
 			
+		} else if (e.getSource() == leftButton) {
+			VideoFilterPanel videoFilterPanel = VideoFilterPanel.getInstance();
+			CardLayout card = (CardLayout)videoFilterPanel.getLayout();
+			
+			card.show(videoFilterPanel, videoFilterPanel.FADEFILTERSTRING);
+		} else if (e.getSource() == addSubtitleToVideoButton) {
+			if (mediaPlayer.isPlayable()) {
+				executeAddSubtitle();
+			} else {
+				JOptionPane.showMessageDialog(null, "Media must be playing before trying to add subtitles to a video file");
+			}
+		} else if (e.getSource() == startButton) {
+			if (mediaPlayer.isPlayable()) {
+				String formattedTime = MediaTimer.getFormattedTime(mediaPlayer.getTime());
+				setStartTime(formattedTime);
+			} else {
+				JOptionPane.showMessageDialog(null, "Media must be playing");
+			}
+		} else if (e.getSource() == endButton) {
+			if (mediaPlayer.isPlayable()) {
+				String formattedTime = MediaTimer.getFormattedTime(mediaPlayer.getTime());
+				setEndTime(formattedTime);
+			} else {
+				JOptionPane.showMessageDialog(null, "Media must be playing");
+			}
 		}
 	}
+	
+	/**
+	 * 
+	 */
+	
+	private void executeAddSubtitle() {
+		int videoLength = (int)(mediaPlayer.getLength() / 1000);
 
+		ProgressMonitor monitor = new ProgressMonitor(null, "Adding subtitles has started", "", 0, videoLength);
+		
+		String inputFilename = subtitleFileSelection.getInputFilename();
+		
+		if (inputFilename != null) {
+		
+			String outputFilename = subtitleFileSelection.getOutputVideoFilename();
+			
+			if (outputFilename != null) {
+				SubtitleWorker worker = new SubtitleWorker(
+						VamixProcesses.getFilename(mediaPlayer.mrl()),
+						inputFilename,
+						outputFilename,
+						monitor
+						);
+				
+				worker.execute();
+			}
+			
+		}
+	}
+	
 	private void addData(String inputFilename) {
 		model.setNumRows(0);
 		try {
@@ -439,6 +603,25 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		return true;
 	}
 
+	/**
+	 * Determines if data is valid to add to table.
+	 * @return valid data
+	 */
+	
+	private boolean verifyData() {
+		String startTime = MediaTimer.getFormattedTime((int)startSpinnerHours.getValue(), (int)startSpinnerMinutes.getValue(), (int)startSpinnerSeconds.getValue());
+		String endTime = MediaTimer.getFormattedTime((int)endSpinnerHours.getValue(), (int)endSpinnerMinutes.getValue(), (int)endSpinnerSeconds.getValue());
+		int difference = MediaTimer.getSeconds(endTime) - MediaTimer.getSeconds(startTime);
+		
+		if (difference > 0) {
+			return true;
+		}
+		
+		JOptionPane.showMessageDialog(null, "Please make sure that the end time is later than the start time.");
+		
+		return false;
+	}
+	
 	private void saveSubtitle(String filename) {
 		File file = new File(filename);
 		

@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 /**
  * 
  * Singleton design pattern. Responsible for displaying media player and the playbackPanel.

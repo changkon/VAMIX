@@ -25,7 +25,10 @@ public enum FilterFont {
 	private FilterFont(String fontName) {
 		try {
 			this.path = VamixProcesses.getFontDirectory(fontName);
-			font = Font.createFont(Font.TRUETYPE_FONT, new File(path));
+			
+			if (path != null) {
+				font = Font.createFont(Font.TRUETYPE_FONT, new File(path));
+			}
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

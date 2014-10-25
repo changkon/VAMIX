@@ -1,5 +1,6 @@
 package panel;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -10,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -17,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 import operation.AudioFileSelection;
@@ -24,12 +28,14 @@ import operation.FileSelection;
 import operation.MediaTimer;
 import operation.VamixProcesses;
 import operation.VideoFileSelection;
+import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioReplaceWorker;
 import worker.ExtractAudioWorker;
 import worker.OverlayWorker;
 
 import component.FileType;
+import component.Playback;
 
 /**
  * First page of audio panel. Contains extraction, replace and overlay features.
@@ -65,6 +71,9 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	
 	private FileSelection audioFileSelection, videoFileSelection;
 	
+	private JButton rightButton;
+	private JPanel navigationPanel;
+	
 	public static AudioFirstPagePanel getInstance() {
 		if (theInstance == null) {
 			theInstance = new AudioFirstPagePanel();
@@ -81,6 +90,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		setAudioExtractionPanel();
 		setAudioReplacePanel();
 		setAudioOverlayPanel();
+		setNavigationPanel();
 		
 		audioFileSelection = new AudioFileSelection();
 		videoFileSelection = new VideoFileSelection();
@@ -90,6 +100,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		add(audioExtractionPanel, "wrap 0px, pushx, growx");
 		add(audioReplacePanel, "wrap 0px, pushx, growx");
 		add(audioOverlayPanel, "pushx, growx, wrap 0px");
+		add(navigationPanel, "south");
 	}
 
 	// Initialise panel for extraction and its layout
@@ -101,17 +112,17 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		
 		JLabel lengthLabel = new JLabel("Length Time:");
 		
-		Font font = extractionLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f); // Default is 12.
+		Font font = extractionLabel.getFont().deriveFont(Font.BOLD, 16f); // Default is 12.
 
 		JLabel orLabel = new JLabel("OR");
 
 		extractionLabel.setFont(font);
 
 		extractButton.setForeground(Color.WHITE);
-		extractButton.setBackground(new Color(183, 183, 183));
+		extractButton.setBackground(new Color(59, 89, 182)); // blue
 
 		extractFullButton.setForeground(Color.WHITE);
-		extractFullButton.setBackground(new Color(183, 183, 183));
+		extractFullButton.setBackground(new Color(59, 89, 182)); // blue
 
 		audioExtractionPanel.add(extractionLabel, "wrap");
 		audioExtractionPanel.add(timeLabel, "wrap");
@@ -130,16 +141,15 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private void setAudioReplacePanel() {
 		JLabel replaceAudioLabel = new JLabel("Replace Audio");
 		
-		Font font = replaceAudioLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f); // Default is 12.
+		Font font = replaceAudioLabel.getFont().deriveFont(Font.BOLD, 16f); // Default is 12.
 
 		replaceAudioLabel.setFont(font);
 
 		// Custom coloured button
 		selectAudioReplaceFileButton.setForeground(Color.WHITE);
-		selectAudioReplaceFileButton.setBackground(new Color(99, 184, 255)); // blue
-
-		audioReplaceButton.setForeground(Color.WHITE);
-		audioReplaceButton.setBackground(new Color(183, 183, 183));
+		selectAudioReplaceFileButton.setBackground(new Color(59, 89, 182)); // blue
+		
+		audioReplaceButton.setBackground(new Color(219, 219, 219)); // light grey
 
 		audioReplacePanel.add(replaceAudioLabel, "wrap");
 		audioReplacePanel.add(selectAudioReplaceFileButton);
@@ -150,20 +160,33 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private void setAudioOverlayPanel() {
 		JLabel audioOverlayLabel = new JLabel("Overlay Audio");
 		
-		Font font = audioOverlayLabel.getFont().deriveFont(Font.ITALIC + Font.BOLD, 16f);
+		Font font = audioOverlayLabel.getFont().deriveFont(Font.BOLD, 16f);
 
 		audioOverlayLabel.setFont(font);
-
+		
 		selectAudioOverlayFileButton.setForeground(Color.WHITE);
-		selectAudioOverlayFileButton.setBackground(new Color(99, 184, 255)); // blue
-
-		audioOverlayButton.setForeground(Color.WHITE);
-		audioOverlayButton.setBackground(new Color(183, 183, 183));
+		selectAudioOverlayFileButton.setBackground(new Color(59, 89, 182)); // blue
+		
+		audioOverlayButton.setBackground(new Color(219, 219, 219)); // light grey
 
 		audioOverlayPanel.add(audioOverlayLabel, "wrap");
 		audioOverlayPanel.add(selectAudioOverlayFileButton);
 		audioOverlayPanel.add(selectedAudioOverlayFileTextField, "pushx, growx, wrap");
 		audioOverlayPanel.add(audioOverlayButton);
+	}
+	
+	private void setNavigationPanel() {
+		navigationPanel = new JPanel(new MigLayout());
+		
+		MediaIcon mediaIcon = new MediaIcon(15, 15);
+		rightButton = new JButton(mediaIcon.getIcon(Playback.RIGHT));
+		
+		rightButton.setToolTipText("Go to next page");
+		rightButton.setBorderPainted(false);
+		rightButton.setFocusPainted(false);
+		rightButton.setContentAreaFilled(false);
+		
+		navigationPanel.add(rightButton, "pushx, align right");
 	}
 	
 	// Initialise listeners
@@ -176,6 +199,19 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 		selectAudioOverlayFileButton.addActionListener(this);
 		audioOverlayButton.addActionListener(this);
+		
+		rightButton.addActionListener(this);
+		rightButton.getModel().addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            ButtonModel model = (ButtonModel) e.getSource();
+	            if (model.isRollover()) {
+	            	rightButton.setBorderPainted(true);
+	            } else {
+	            	rightButton.setBorderPainted(false);
+	            }
+	        }
+	    });
 	}
 
 	@Override
@@ -245,6 +281,10 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 					executeOverlay(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
 				}
 			}
+		} else if (e.getSource() == rightButton) {
+			AudioFilterPanel audioFilterPanel = AudioFilterPanel.getInstance();
+			CardLayout card = (CardLayout)audioFilterPanel.getLayout();
+			card.show(audioFilterPanel, audioFilterPanel.AUDIOSECONDPAGESTRING);
 		}
 	}
 

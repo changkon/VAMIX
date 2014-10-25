@@ -14,12 +14,12 @@ import operation.MediaTimer;
  * Shows preview of filter options. Opens a JFrame and shows the video with filters.
  */
 
-public class FilterPreviewWorker extends SwingWorker<Void, Void> {
+public class TextFilterPreviewWorker extends SwingWorker<Void, Void> {
 	private String inputFile;
 	private Object[] data;
 
 
-	public FilterPreviewWorker(String inputFile, Object[] data) {
+	public TextFilterPreviewWorker(String inputFile, Object[] data) {
 		this.inputFile = inputFile;
 		this.data = data;
 	}
