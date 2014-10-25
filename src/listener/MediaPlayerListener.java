@@ -40,7 +40,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					playbackPanel.finishTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getLength()));
+					playbackPanel.finishTimeLabel.setText(MediaTimer.getMediaTime(mediaPlayer.getLength()));
 					
 					/*
 					 * When setting the minimum value, it calls its change listeners. As our timeslider forcibly changes
@@ -49,7 +49,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 					((TimeBoundedRangeModel)playbackPanel.timeSlider.getModel()).setActive(false);
 					playbackPanel.timeSlider.setMinimum(0);
 					playbackPanel.timeSlider.setMaximum((int)mediaPlayer.getLength()); // only accepts int.
-					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
+					playbackPanel.startTimeLabel.setText(MediaTimer.getMediaTime(mediaPlayer.getTime()));
 					playbackPanel.muteButton.setIcon(mediaIcon.getIcon(Playback.UNMUTE));
 					mediaPlayer.mute(false);
 				}
@@ -151,7 +151,7 @@ public class MediaPlayerListener extends MediaPlayerEventAdapter {
 
 				@Override
 				public void run() {
-					playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(newTime));
+					playbackPanel.startTimeLabel.setText(MediaTimer.getMediaTime(newTime));
 					
 					// Turn "off" the change listener. So that when it calls statechanged, it does set time because the boolean is set to false.
 					((TimeBoundedRangeModel)playbackPanel.timeSlider.getModel()).setActive(false);

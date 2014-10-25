@@ -5,57 +5,23 @@ import java.util.Iterator;
 
 import javax.swing.ProgressMonitor;
 
-import res.FilterColor;
-import res.FilterFont;
-import setting.MediaSetting;
+import operation.MediaTimer;
 
 /**
  * Encodes filter options to file. Progress is shown on progress monitor.
  */
 
 public class FilterSaveWorker extends DefaultWorker {
-	private String inputFile, outputFile, openingText, closingText, openingX, openingY, closingX, closingY;
-	private FilterFont openingFont, closingFont;
-	private int openingFontSize, closingFontSize, filterOpeningLength, filterClosingLength, lastSeconds;
-	private ArrayList<String> textList;
+	private String inputFile, outputFile;
+	private ArrayList<Object[]> textList;
 	
-	public FilterSaveWorker(String inputFile, String outputFile, ArrayList<String> textList, ProgressMonitor monitor) {
+	public FilterSaveWorker(String inputFile, String outputFile, ArrayList<Object[]> textList, ProgressMonitor monitor) {
 		
 		super(monitor);
 		
 		this.inputFile = inputFile;
 		this.outputFile = outputFile;
-		
-		// Set openingX/openingY and closingX/closingY. If the value is empty, give it determined values.
-		if (openingX.equals("")) {
-			this.openingX = "(W/2)-(w/2)"; // Sets to middle of screen. W = main input width. w = text width.
-		} else {
-			this.openingX = openingX;
-		}
-		
-		if (closingX.equals("")) {
-			this.closingX = "(W/2)-(w/2)";
-		} else {
-			this.closingX = closingX;
-		}
-		
-		if (openingY.equals("")) {
-			this.openingY = "(H/1.1)"; // Sets near the bottom of the screen. H = main input height.
-		} else {
-			this.openingY = openingY;
-		}
-		
-		if (closingY.equals("")) {
-			this.closingY = "(H/1.1)";
-		} else {
-			this.closingY = closingY;
-		}		
-		
 		this.textList = textList;
-		
-		filterOpeningLength = MediaSetting.getInstance().getOpeningFilterLength();
-		filterClosingLength = MediaSetting.getInstance().getClosingFilterLength();
-		lastSeconds = monitor.getMaximum() - filterClosingLength;
 		
 		initialiseVariables();
 	}
@@ -63,22 +29,22 @@ public class FilterSaveWorker extends DefaultWorker {
 	@Override
 	protected String getCommand() {
 		//detects the number of seconds to display for and what to display
-		StringBuilder command = new StringBuilder("avconv -i \'" + inputFile + "\' -c:a copy -vf ");
+		StringBuilder command = new StringBuilder();
 		
-		command.append("drawtext=\"fontfile=");
+		command.append("avconv -i \'" + inputFile + "\' -c:a copy -vf drawtext=\"fontfile=");
 		
-		for (Iterator<String> iter = textList.iterator(); iter.hasNext();) {
-			String i = iter.next();
-			// Arbitrary text pattern
-			String[] splitText = i.split(",::,");
+		for (Iterator<Object[]> iter = textList.iterator(); iter.hasNext();) {
+			Object[] i = iter.next();
 			
-			command.append(splitText[0] + ": fontsize=");
-			command.append(splitText[1] + ": fontcolor=");
-			command.append(splitText[2] + ": x=");
-			command.append(splitText[3] + ": y=");
-			command.append(splitText[4] + ": text=\'");
-			command.append(splitText[5] + "\': draw=\'lt(t,");
-			command.append(splitText[6] + ")\'");
+			int visibleTime = MediaTimer.getSeconds(i[0].toString()) + MediaTimer.getDifferenceInTimeSeconds(i[0].toString(), i[1].toString());
+			
+			command.append(i[3] + ": fontsize=");
+			command.append(i[4] + ": fontcolor=");
+			command.append(i[5] + ": x=");
+			command.append(i[6] + ": y=");
+			command.append(i[7] + ": text=\'");
+			command.append(i[2] + "\': draw=\'gt(t," + MediaTimer.getSeconds(i[0].toString()) + ")*lt(t,");
+			command.append(visibleTime + ")\'");
 			
 			if (iter.hasNext()) {
 				command.append(":,drawtext=fontfile=");
@@ -86,7 +52,7 @@ public class FilterSaveWorker extends DefaultWorker {
 		}
 		
 		command.append("\" -y \'" + outputFile + "\'");
-
+		System.out.println(command.toString());
 		return command.toString();
 	}
 	

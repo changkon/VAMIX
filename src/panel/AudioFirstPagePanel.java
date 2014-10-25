@@ -1,6 +1,5 @@
 package panel;
 
-import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -11,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
-import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -19,8 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 import operation.AudioFileSelection;
@@ -28,14 +24,12 @@ import operation.FileSelection;
 import operation.MediaTimer;
 import operation.VamixProcesses;
 import operation.VideoFileSelection;
-import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.AudioReplaceWorker;
 import worker.ExtractAudioWorker;
 import worker.OverlayWorker;
 
 import component.FileType;
-import component.Playback;
 
 /**
  * First page of audio panel. Contains extraction, replace and overlay features.
@@ -68,9 +62,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private JButton selectAudioOverlayFileButton = new JButton("Choose File");
 	private JTextField selectedAudioOverlayFileTextField = new JTextField();
 	private JButton audioOverlayButton = new JButton("Overlay");
-
-	private JPanel pageNavigationPanel = new JPanel(new MigLayout());
-	private JButton rightButton;
 	
 	private FileSelection audioFileSelection, videoFileSelection;
 	
@@ -90,7 +81,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		setAudioExtractionPanel();
 		setAudioReplacePanel();
 		setAudioOverlayPanel();
-		setPageNavigationPanel();
 		
 		audioFileSelection = new AudioFileSelection();
 		videoFileSelection = new VideoFileSelection();
@@ -100,7 +90,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		add(audioExtractionPanel, "wrap 0px, pushx, growx");
 		add(audioReplacePanel, "wrap 0px, pushx, growx");
 		add(audioOverlayPanel, "pushx, growx, wrap 0px");
-		add(pageNavigationPanel, "south");
 	}
 
 	// Initialise panel for extraction and its layout
@@ -176,18 +165,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 		audioOverlayPanel.add(selectedAudioOverlayFileTextField, "pushx, growx, wrap");
 		audioOverlayPanel.add(audioOverlayButton);
 	}
-
-	private void setPageNavigationPanel() {
-		MediaIcon mediaIcon = new MediaIcon(15, 15);
-		rightButton = new JButton(mediaIcon.getIcon(Playback.RIGHT));
-		
-		rightButton.setToolTipText("Go to second page");
-		rightButton.setContentAreaFilled(false);
-		rightButton.setFocusPainted(false);
-		rightButton.setBorderPainted(false);
-		
-		pageNavigationPanel.add(rightButton, "pushx, span, align right");
-	}
 	
 	// Initialise listeners
 	private void addListeners() {
@@ -199,20 +176,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 		selectAudioOverlayFileButton.addActionListener(this);
 		audioOverlayButton.addActionListener(this);
-		
-		rightButton.getModel().addChangeListener(new ChangeListener() {
-	        @Override
-	        public void stateChanged(ChangeEvent e) {
-	            ButtonModel model = (ButtonModel) e.getSource();
-	            if (model.isRollover()) {
-	            	rightButton.setBorderPainted(true);
-	            } else {
-	            	rightButton.setBorderPainted(false);
-	            }
-	        }
-	    });
-		
-		rightButton.addActionListener(this);
 	}
 
 	@Override
@@ -283,13 +246,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 					executeOverlay(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);
 				}
 			}
-		} else if (e.getSource() == rightButton) {
-			CardLayout card = MainPanel.getInstance().getAudioCard();
-			
-			JPanel audioPanels = MainPanel.getInstance().getAudioPanel();
-			String secondPageString = MainPanel.getInstance().audioSecondPageString;
-			
-			card.show(audioPanels, secondPageString);
 		}
 	}
 
@@ -305,10 +261,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	private void executeReplace(String videoInput, String audioInput, String videoOutput) {
 		int audioInputLength = VamixProcesses.probeDuration(audioInput);
 		int mediaPlayerLength = (int)mediaPlayer.getLength() / 1000;
-		
-		System.out.println(audioInput);
-		System.out.println(audioInputLength);
-		System.out.println(mediaPlayerLength);
 		
 		ProgressMonitor monitor = new ProgressMonitor(null, "Replacing audio has started",
 				"In progress..", 0, Math.max(audioInputLength, mediaPlayerLength));

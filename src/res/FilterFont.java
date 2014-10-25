@@ -5,24 +5,26 @@ import java.awt.FontFormatException;
 import java.io.File;
 import java.io.IOException;
 
+import operation.VamixProcesses;
+
 /**
  * 
  * Contains a directory to the font file.
  */
 
 public enum FilterFont {
-	FREESERIF(System.getProperty("user.dir") + "/res/FreeSerif.ttf"),
-	UBUNTU_LIGHT(System.getProperty("user.dir") + "/res/Ubuntu-L.ttf"),
-	UBUNTU_REGULAR(System.getProperty("user.dir") + "/res/Ubuntu-R.ttf"),
-	UBUNTU_MEDIUM(System.getProperty("user.dir") + "/res/Ubuntu-M.ttf"),
-	UBUNTU_CONDENSED(System.getProperty("user.dir") + "/res/Ubuntu-C.ttf");
+	FREESERIF("FreeSerif.ttf"),
+	UBUNTU_LIGHT("Ubuntu-L.ttf"),
+	UBUNTU_REGULAR("Ubuntu-R.ttf"),
+	UBUNTU_MEDIUM("Ubuntu-M.ttf"),
+	UBUNTU_CONDENSED("Ubuntu-C.ttf");
 	
 	private Font font;
 	private String path;
 	
-	private FilterFont(String path) {
+	private FilterFont(String fontName) {
 		try {
-			this.path = path;
+			this.path = VamixProcesses.getFontDirectory(fontName);
 			font = Font.createFont(Font.TRUETYPE_FONT, new File(path));
 		} catch (FontFormatException e) {
 			e.printStackTrace();
@@ -55,23 +57,5 @@ public enum FilterFont {
 			default:
 				return "";
 		}
-	}
-	
-	public static FilterFont toFilterFont(String str){
-		switch(str) {
-		case "FreeSerif":
-			return FilterFont.FREESERIF;
-		case "Ubuntu Light":
-			return FilterFont.UBUNTU_LIGHT;
-		case "Ubuntu Regular":
-			return FilterFont.UBUNTU_REGULAR;
-		case "Ubuntu Medium":
-			return FilterFont.UBUNTU_MEDIUM;
-		case "Ubuntu Condensed":
-			return FilterFont.UBUNTU_CONDENSED;
-		default:
-			return null;
-	}
-		
 	}
 }

@@ -96,7 +96,7 @@ public abstract class FileSelection {
 			
 			for (String[] element : outputFilterList) {
 				if (extensionType.contains(element[0]) && !saveFile.getAbsolutePath().contains(element[1])) {
-					outputFilename = outputFilename + element[1];
+					outputFilename = outputFilename + "." + element[1];
 					break;
 				}
 			}

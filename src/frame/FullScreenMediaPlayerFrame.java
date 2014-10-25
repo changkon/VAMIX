@@ -158,7 +158,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 		// Sets the correct time for the mediaPanel media player when exiting full screen and volume.
 		PlaybackPanel mediaPanelPlayback = MediaPanel.getInstance().getPlaybackPanel();
 		
-		mediaPanelPlayback.startTimeLabel.setText(MediaTimer.getFormattedTime(mediaPlayer.getTime()));
+		mediaPanelPlayback.startTimeLabel.setText(MediaTimer.getMediaTime(mediaPlayer.getTime()));
 		mediaPanelPlayback.timeSlider.setValue((int)mediaPlayer.getTime());
 		mediaPanelPlayback.volumeSlider.setValue(mediaPlayer.getVolume());
 		

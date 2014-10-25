@@ -231,4 +231,33 @@ public class VamixProcesses {
 		return -1;
 	}
 
+	/**
+	 * Returns the directory of the font file in the computer.
+	 * {@link res.FilterFont}
+	 * @param font
+	 * @return absolute path of Font
+	 */
+	
+	public static String getFontDirectory(String font) {
+		ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "fc-list | grep \'" + font + "\'");
+		builder.redirectErrorStream(true);
+		try {
+			Process process = builder.start();
+			
+			InputStream stdout = process.getInputStream();
+			BufferedReader buffer = new BufferedReader(new InputStreamReader(stdout));
+			
+			String line = "";
+			
+			if ((line = buffer.readLine()) != null) {
+				String[] split = line.split(":");
+				return split[0];
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
 }

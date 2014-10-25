@@ -8,7 +8,7 @@ public class VideoFileSelection extends FileSelection {
 
 	@SuppressWarnings("serial")
 	private static ArrayList<String[]> filterList = new ArrayList<String[]>() {{
-		add(new String[] {"MPEG-4/mp3", "mp4"});
+		add(new String[] {"MPEG-4/mp4", "mp4"});
 		add(new String[] {"Audio Video Interleaved/avi", "avi"});
 		add(new String[] {"Matroska/mkv", "mkv"});
 	}};

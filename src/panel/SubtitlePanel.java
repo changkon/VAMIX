@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,13 +34,15 @@ import operation.FileSelection;
 import operation.MediaTimer;
 import operation.SubtitleFileSelection;
 
+import component.RowSort;
+
 @SuppressWarnings("serial")
 public class SubtitlePanel extends JPanel implements ActionListener {
 	private static SubtitlePanel theInstance = null;
 
 	private JPanel menuPanel, tablePanel;
 
-	private JButton importButton, startButton, endButton, addButton, editSaveButton, deleteButton, saveButton;
+	private JButton importButton, startButton, endButton, addButton, editChangeButton, deleteButton, saveButton;
 
 	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
 
@@ -53,7 +54,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private DefaultTableModel model;
 
-	private final String[] EDITSAVE = {"Edit", "Change"};
+	private final String[] EDITCHANGE = {"Edit", "Change"};
 
 	private Pattern p;
 
@@ -89,7 +90,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		startButton = new JButton("Start");
 		endButton = new JButton("End");
 		addButton = new JButton("Add");
-		editSaveButton = new JButton(EDITSAVE[0]);
+		editChangeButton = new JButton(EDITCHANGE[0]);
 		deleteButton = new JButton("Delete");
 		saveButton = new JButton("Save");
 		
@@ -166,7 +167,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		menuPanel.add(endSpinnerSeconds, "gap 0, wrap");
 		menuPanel.add(textScroll, "span, push, grow, wrap");
 		menuPanel.add(addButton, "span, split 4, align center");
-		menuPanel.add(editSaveButton);
+		menuPanel.add(editChangeButton);
 		menuPanel.add(deleteButton);
 		menuPanel.add(saveButton);
 	}
@@ -197,7 +198,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		startButton.addActionListener(this);
 		endButton.addActionListener(this);
 		addButton.addActionListener(this);
-		editSaveButton.addActionListener(this);
+		editChangeButton.addActionListener(this);
 		deleteButton.addActionListener(this);
 		saveButton.addActionListener(this);
 	}
@@ -212,7 +213,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 			}
 
 		} else if (e.getSource() == addButton) {
-			Object[] data = getData();
+			Object[] data = getSubtitleData();
 
 			model.addRow(data);
 
@@ -220,13 +221,13 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 				sortData();
 			}
 
-		} else if (e.getSource() == editSaveButton) {
+		} else if (e.getSource() == editChangeButton) {
 			int selection = table.getSelectedRow();
 			if (selection == -1) {
 				JOptionPane.showMessageDialog(null, "Please select a subtitle to edit");
 			} else {
-				if (editSaveButton.getText().equals(EDITSAVE[0])) {
-					editSaveButton.setText(EDITSAVE[1]);
+				if (editChangeButton.getText().equals(EDITCHANGE[0])) {
+					editChangeButton.setText(EDITCHANGE[1]);
 					rowToEdit = selection;
 					table.setRowSelectionAllowed(false);
 					addButton.setEnabled(false);
@@ -241,8 +242,8 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 					textArea.setText(values[2].toString());
 
 				} else {
-					editSaveButton.setText(EDITSAVE[0]);
-					Object[] data = getData();
+					editChangeButton.setText(EDITCHANGE[0]);
+					Object[] data = getSubtitleData();
 					
 					model.setValueAt(data[0], rowToEdit, 0);
 					model.setValueAt(data[1], rowToEdit, 1);
@@ -352,7 +353,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	 * @return Object[]
 	 */
 	
-	private Object[] getData() {
+	private Object[] getSubtitleData() {
 		Object[] data = new Object[3];
 		
 		data[0] = MediaTimer.getFormattedTime((int)startSpinnerHours.getValue(), (int)startSpinnerMinutes.getValue(), (int)startSpinnerSeconds.getValue());
@@ -470,61 +471,5 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 			e.printStackTrace();
 		}
 		
-	}
-	
-	/**
-	 * Used to sort the data values in the JTable. It accepts strings in the format hh:mm:ss or else it will throw an exception.
-	 * @author chang
-	 *
-	 */
-
-	private class RowSort implements Comparator<Object> {
-
-		@Override
-		public int compare(Object o1, Object o2) {
-			// Vector objects come in the form [..., ...., ...]
-			String[] split1 = o1.toString().split(",");
-			String[] split2 = o2.toString().split(",");
-
-			int firstTime = 0, secondTime = 0;
-			Matcher m;
-			m = p.matcher(split1[0]);
-			if (m.find()) {
-				firstTime = MediaTimer.getSeconds(m.group());
-			}
-
-			m = p.matcher(split2[0]);
-			if (m.find()) {
-				secondTime = MediaTimer.getSeconds(m.group());
-			}
-
-			if (firstTime > secondTime) {
-				return 1;
-			} else if (secondTime > firstTime) {
-				return -1;
-			} else {
-
-				m = p.matcher(split1[1]);
-
-				if (m.find()) {
-					firstTime = MediaTimer.getSeconds(m.group());
-				}
-
-				m = p.matcher(split2[1]);
-
-				if (m.find()) {
-					secondTime = MediaTimer.getSeconds(m.group());
-				}
-
-				if (firstTime > secondTime) {
-					return 1;
-				} else if (secondTime > firstTime) {
-					return -1;
-				}
-				// else
-				return 0;
-			}
-		}
-
 	}
 }

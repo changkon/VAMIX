@@ -294,7 +294,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 		        int value = timeSlider.getValue(); 
 		        if (timeSlider.getOrientation() == JSlider.HORIZONTAL) {
 		            value = this.valueForXPosition(timeSlider.getMousePosition().x);
-		            startTimeLabel.setText(MediaTimer.getFormattedTime(value));
+		            startTimeLabel.setText(MediaTimer.getMediaTime(value));
 		        } else if (timeSlider.getOrientation() == JSlider.VERTICAL) {
 		            value = this.valueForYPosition(timeSlider.getMousePosition().y);
 		        }

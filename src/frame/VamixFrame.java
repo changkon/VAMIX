@@ -1,9 +1,10 @@
 package frame;
 
-import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -12,13 +13,18 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import net.miginfocom.swing.MigLayout;
+import panel.AudioPanel;
 import panel.DownloadPanel;
-import panel.MainPanel;
+import panel.FilterPanel;
 import panel.MediaPanel;
 import panel.MediaPlayerComponentPanel;
 import panel.PlaybackPanel;
+import panel.SubtitlePanel;
+import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 
 /**
  * 
@@ -30,53 +36,44 @@ import panel.PlaybackPanel;
 @SuppressWarnings("serial")
 public class VamixFrame extends JFrame implements ActionListener {
 
-	private JPanel panels = new JPanel(new CardLayout());
+	private JPanel vamixPanel;
 	
-	private JMenuBar menuBar = new JMenuBar();
+	private JMenuBar menuBar;
 	
-	private JMenu panelMenu = new JMenu("Panel");
-	private JMenuItem mainPanelOption = new JMenuItem("Main"); 
-	private JMenuItem downloadPanelOption = new JMenuItem("Download");
-	
-	private JMenu mediaMenu = new JMenu("Media");
-	private JMenuItem openMenuOption = new JMenuItem("Open..");
+	private JMenu mediaMenu, helpMenu;
+	private JMenuItem openMenuOption, aboutMenuOption;
 	
 //	private JMenu toolMenu = new JMenu("Tools");
 //	private JMenuItem settingMenuOption = new JMenuItem("Settings");
 	
-	private JMenu helpMenu = new JMenu("Help");
-	private JMenuItem aboutMenuOption = new JMenuItem("About");
+	private MediaPlayerComponentPanel mediaPlayerComponentPanel;
+	private PlaybackPanel playbackPanel;
 	
-	private MainPanel mainPanel = MainPanel.getInstance();
-	private final String MAIN = "Main";
-	
-	private DownloadPanel downloadPanel = DownloadPanel.getInstance();
-	private final String DOWNLOAD = "Download";
-	
-	private MediaPlayerComponentPanel mediaPlayerComponentPanel = MediaPanel.getInstance().getMediaPlayerComponentPanel();
-	private PlaybackPanel playbackPanel = MediaPanel.getInstance().getPlaybackPanel();
+	private JTabbedPane tabbedPane;
 	
 	public VamixFrame() {
 		super("VAMIX");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setMinimumSize(new Dimension(1500, 500));
-		setPreferredSize(new Dimension(1500, 500));
+		setMinimumSize(new Dimension(1500, 600));
+		setPreferredSize(new Dimension(1500, 600));
 		setResizable(false); // change later but at the moment, make it not resizable.
 		
 		setMenuBar();
 		setJMenuBar(menuBar);
+		setVamixPanel();
 		
-		panels.add(mainPanel, MAIN);
-		panels.add(downloadPanel, DOWNLOAD);
-		
-		add(panels);
+		add(vamixPanel);
 		
 		addListeners();
 	}
 	
 	private void setMenuBar() {
-		panelMenu.add(mainPanelOption);
-		panelMenu.add(downloadPanelOption);
+		menuBar = new JMenuBar();
+		mediaMenu = new JMenu("Media");
+		openMenuOption = new JMenuItem("Open..");
+		
+		helpMenu = new JMenu("Help");
+		aboutMenuOption = new JMenuItem("About");
 		
 		mediaMenu.add(openMenuOption);
 		
@@ -84,16 +81,36 @@ public class VamixFrame extends JFrame implements ActionListener {
 		
 		helpMenu.add(aboutMenuOption);
 		
-		menuBar.add(panelMenu);
 		menuBar.add(mediaMenu);
 //		menuBar.add(toolMenu);
 		menuBar.add(helpMenu);
 	}
 	
+	private void setVamixPanel() {
+		vamixPanel = new JPanel(new MigLayout());
+		
+		// Get all the panels
+		MediaPanel mediaPanel = MediaPanel.getInstance();
+		DownloadPanel downloadPanel = DownloadPanel.getInstance();
+		AudioPanel audioPanel = AudioPanel.getInstance();
+		FilterPanel filterPanel = FilterPanel.getInstance();
+		SubtitlePanel subtitlePanel = SubtitlePanel.getInstance();
+		
+		mediaPlayerComponentPanel = MediaPanel.getInstance().getMediaPlayerComponentPanel();
+		playbackPanel = MediaPanel.getInstance().getPlaybackPanel();
+		
+		tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Download", downloadPanel);
+		tabbedPane.addTab("Audio", audioPanel);
+		tabbedPane.addTab("Filter", filterPanel);
+		tabbedPane.addTab("Subtitle", subtitlePanel);
+		
+		vamixPanel.add(mediaPanel, "width 1000px, height 600px, push, grow");
+		vamixPanel.add(tabbedPane, "push, grow");
+	}
+	
 	private void addListeners() {
 		openMenuOption.addActionListener(this);
-		mainPanelOption.addActionListener(this);
-		downloadPanelOption.addActionListener(this);
 //		settingMenuOption.addActionListener(this);
 		aboutMenuOption.addActionListener(this);
 		
@@ -107,20 +124,27 @@ public class VamixFrame extends JFrame implements ActionListener {
 			}
 			
 		});
+		
+		EmbeddedMediaPlayerComponent mediaPlayerComponent = mediaPlayerComponentPanel.getMediaPlayerComponent();
+		// Go to full screen when double clicked.
+		mediaPlayerComponent.getVideoSurface().addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				JFrame vamixFrame = (JFrame)SwingUtilities.getWindowAncestor(MediaPanel.getInstance());
+				if (e.getClickCount() == 2) {
+					FullScreenMediaPlayerFrame fullScreen = new FullScreenMediaPlayerFrame(vamixFrame);
+					fullScreen.setFullScreen();
+				}
+			}
+			
+		});
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == openMenuOption) {
 			playbackPanel.playFile();
-		} else if (e.getSource() == mainPanelOption) {
-			// Shows main menu panel.
-			CardLayout c = (CardLayout)panels.getLayout();
-			c.show(panels, MAIN);
-		} else if (e.getSource() == downloadPanelOption) {
-			// Shows download menu panel.
-			CardLayout c = (CardLayout)panels.getLayout();
-			c.show(panels, DOWNLOAD);
 //		} else if (e.getSource() == settingMenuOption) {
 //			SettingFrame settingFrame = SettingFrame.getInstance();
 //			settingFrame.setVisible(true);
