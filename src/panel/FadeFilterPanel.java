@@ -6,27 +6,19 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSpinner.DefaultEditor;
-import javax.swing.JTable;
 import javax.swing.ProgressMonitor;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
 import operation.FileSelection;
@@ -36,15 +28,14 @@ import operation.TextFileSelection;
 import operation.VamixProcesses;
 import operation.VideoFileSelection;
 import res.MediaIcon;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.FadeFilterPreviewWorker;
 import worker.FadeFilterSaveWorker;
+
 import component.FileType;
 import component.Playback;
-import component.RowSort;
 
 @SuppressWarnings("serial")
-public class FadeFilterPanel extends JPanel implements ActionListener {
+public class FadeFilterPanel extends SpinnerTableTemplatePanel implements ActionListener {
 	private static FadeFilterPanel theInstance = null;
 	
 	private TitledBorder title;
@@ -53,22 +44,12 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 	private JComboBox<String> fadeCombo;
 	
 	private JLabel fadeLabel;
-	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
 	
-	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, addButton, editChangeButton, deleteButton, startButton, endButton, leftButton, rightButton;
+	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, leftButton, rightButton;
 	
 	private JPanel optionPanel, tablePanel, buttonPanel, navigationPanel;
 	
-	private JScrollPane tableScroll;
-	private JTable table;
-	private DefaultTableModel model;
-	
 	private FileSelection videoFileSelection, textFileSelection;
-	
-	private String[] EDITCHANGE = {"Edit", "Change"};
-	private int rowToEdit;
-	
-	private EmbeddedMediaPlayer mediaPlayer;
 	
 	public static FadeFilterPanel getInstance() {
 		if (theInstance == null) {
@@ -82,8 +63,6 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		
 		title = BorderFactory.createTitledBorder("Fade Filter");
 		setBorder(title);
-		
-		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 		
 		videoFileSelection = new VideoFileSelection();
 		textFileSelection = new TextFileSelection();
@@ -111,70 +90,6 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		
 		fadeCombo = new JComboBox<String>(fadeSelection);
 		
-		// http://stackoverflow.com/questions/972194/zero-padding-a-spinner-in-java
-		startSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		startSpinnerSeconds.setEditor(new JSpinner.NumberEditor(startSpinnerSeconds, "00"));
-		JComponent editor = startSpinnerSeconds.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		startSpinnerMinutes = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		startSpinnerMinutes.setEditor(new JSpinner.NumberEditor(startSpinnerMinutes, "00"));
-
-		editor = startSpinnerMinutes.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		startSpinnerHours = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1));
-		startSpinnerHours.setEditor(new JSpinner.NumberEditor(startSpinnerHours, "00"));
-
-		editor = startSpinnerHours.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		endSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		endSpinnerSeconds.setEditor(new JSpinner.NumberEditor(endSpinnerSeconds, "00"));
-
-		editor = endSpinnerSeconds.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		endSpinnerMinutes = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		endSpinnerMinutes.setEditor(new JSpinner.NumberEditor(endSpinnerMinutes, "00"));
-
-		editor = endSpinnerMinutes.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		endSpinnerHours = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1));
-		endSpinnerHours.setEditor(new JSpinner.NumberEditor(endSpinnerHours, "00"));
-
-		editor = endSpinnerHours.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
-		startButton = new JButton("Start");
-		
-		startButton.setForeground(Color.WHITE);
-		startButton.setBackground(new Color(59, 89, 182)); // blue
-		
-		endButton = new JButton("End");
-		
-		endButton.setForeground(Color.WHITE);
-		endButton.setBackground(new Color(59, 89, 182)); // blue
-		
 		optionPanel.add(fadeLabel, "wrap 20px");
 		optionPanel.add(startButton, "split 8");
 		optionPanel.add(startSpinnerHours);
@@ -190,31 +105,9 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 	private void setTablePanel() {
 		tablePanel = new JPanel(new MigLayout());
 		
-		// Override cell editable.
-		model = new DefaultTableModel() {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-
-		table = new JTable(model);
-		table.setFillsViewportHeight(true);
-		
 		model.addColumn("Start Time");
 		model.addColumn("End Time");
 		model.addColumn("Type");
-		
-		tableScroll = new JScrollPane(table);
-		
-		addButton = new JButton("Add");
-		addButton.setBackground(new Color(219, 219, 219)); // light grey
-		
-		editChangeButton = new JButton(EDITCHANGE[0]);
-		editChangeButton.setBackground(new Color(219, 219, 219)); // light grey
-		
-		deleteButton = new JButton("Delete");
-		deleteButton.setBackground(new Color(219, 219, 219)); // light grey
 		
 		tablePanel.add(tableScroll, "height 100px, pushx, growx, wrap 30px");
 		tablePanel.add(addButton, "split 3, align center");
@@ -303,62 +196,11 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 	        }
 	    });
 	}
-
-	/**
-	 * Sets the values for the start JSpinners. Input must be formatted time hh:mm:ss or exception will be thrown.
-	 * @param formattedTime
-	 */
-	
-	private void setStartTime(String formattedTime) {
-		String[] firstTime = formattedTime.split(":");
-		startSpinnerHours.setValue(Integer.parseInt(firstTime[0]));
-		startSpinnerMinutes.setValue(Integer.parseInt(firstTime[1]));
-		startSpinnerSeconds.setValue(Integer.parseInt(firstTime[2]));
-	}
 	
 	/**
-	 * Sets the values for the end JSpinners. Input must be formatted time hh:mm:ss or exception will be thrown.
-	 * @param formattedTime
+	 * Gets the values currently on the panel (currently selected comboBox) and start and end times.
+	 * @return the data from the panel
 	 */
-	
-	private void setEndTime(String formattedTime) {
-		String[] secondTime = formattedTime.split(":");
-
-		endSpinnerHours.setValue(Integer.parseInt(secondTime[0]));
-		endSpinnerMinutes.setValue(Integer.parseInt(secondTime[1]));
-		endSpinnerSeconds.setValue(Integer.parseInt(secondTime[2]));
-	}
-	
-	/**
-	 * Checks if the table needs sorting.
-	 * @return is sorting needed
-	 */
-
-	private boolean needSorting() {
-		if (model.getRowCount() > 1) {
-			// Determines if the row needs to be changed.
-			RowSort sorter = new RowSort();
-			Object o1 = model.getDataVector().get(model.getRowCount() - 1);
-			Object o2 = model.getDataVector().get(model.getRowCount() - 2);
-
-			if (sorter.compare(o1, o2) == -1) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Sorts the rows to be sorted and then calls fireTableDataChanged to notify all listeners that data has been changed.
-	 */
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void sortData() {
-		Vector data = model.getDataVector();
-		Collections.sort(data, new RowSort());
-		model.fireTableDataChanged();
-	}
 	
 	private Object[] getFadeData() {
 		Object[] data = new Object[3];
@@ -370,6 +212,11 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		return data;
 	}
 	
+	/**
+	 * Get the data from the selected row and then preview the fade effect. {@link worker.FadeFilterPreviewWorker}
+	 * @param selection
+	 */
+	
 	private void executeFadeFilterPreview(int selection) {
 		Object[] data = new Object[3];
 		data[0] = model.getValueAt(selection, 0);
@@ -379,10 +226,15 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		worker.execute();
 	}
 	
+	/**
+	 * Get all the values in the table and produce a video with the fade effects. {@link worker.FadeFilterSaveWorker}
+	 * @param outputFilename
+	 */
+	
 	private void executeFadeFilterSave(String outputFilename) {
 		int videoLength = (int)(mediaPlayer.getLength() / 1000);
 
-		ProgressMonitor monitor = new ProgressMonitor(null, "Filtering has started", "", 0, videoLength);
+		ProgressMonitor monitor = new ProgressMonitor(null, "Fade effect filtering has started", "", 0, videoLength);
 
 		ArrayList<Object[]> fadeList = new ArrayList<Object[]>();
 		for (Object element : model.getDataVector()) {
@@ -528,7 +380,8 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 	}
 	
 	/**
-	 * Determines if data is valid to add to table.
+	 * Determines if data is valid to add to table. Checks two conditions, firstly, the end time is after the start time and that duplicate
+	 * fade effects are not added.
 	 * @return valid data
 	 */
 	
@@ -543,7 +396,7 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		}
 		
 		// Checking arbitrary button to see if this should be checked. I check if button is enabled to make sure if value is being edited or not.
-		// If the value is being edited, this should be ignored.
+		// If the value is being edited, this should be ignored as same fade type will be added.
 		if (saveWorkButton.isEnabled()) {
 			String fadeType = (String)fadeCombo.getSelectedItem();
 			
@@ -563,7 +416,7 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 	}
 	
 	/**
-	 * Verifies media is parsed. Also makes sure media is a video type.
+	 * Verifies media is parsed. Also makes sure media is a video type as fade effects cannot be added to an audio file.
 	 * @return
 	 */
 

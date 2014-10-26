@@ -7,29 +7,22 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSpinner.DefaultEditor;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 
 import net.miginfocom.swing.MigLayout;
@@ -43,7 +36,6 @@ import res.FilterColor;
 import res.FilterFont;
 import res.MediaIcon;
 import setting.MediaSetting;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.TextFilterPreviewWorker;
 import worker.TextFilterSaveWorker;
 
@@ -51,7 +43,6 @@ import component.FileType;
 import component.MyStyledDocument;
 import component.MyTextFieldFilter;
 import component.Playback;
-import component.RowSort;
 
 /**
  * Singleton design pattern. Panel contains anything related to filter editing of video.
@@ -59,15 +50,13 @@ import component.RowSort;
  */
 
 @SuppressWarnings("serial")
-public class TextEditPanel extends JPanel implements ActionListener {
+public class TextEditPanel extends SpinnerTableTemplatePanel implements ActionListener {
 	private static TextEditPanel theInstance = null;
 	private TitledBorder title;
 
 	private JPanel tablePanel, optionPanel, buttonPanel, navigationPanel;
 	private JTextArea textArea;
-	private JScrollPane textScroll, tableScroll;
-	private JTable table;
-	private DefaultTableModel model;
+	private JScrollPane textScroll;
 
 	private Integer[] fontSizeSelection = {10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40};
 
@@ -79,17 +68,9 @@ public class TextEditPanel extends JPanel implements ActionListener {
 
 	private JTextField xTextField, yTextField;
 
-	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, addButton, editChangeButton, deleteButton, startButton, endButton, rightButton;
-
-	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
-
-	private EmbeddedMediaPlayer mediaPlayer;
+	private JButton previewButton, saveButton, saveWorkButton, loadWorkButton, rightButton;
 
 	private FileSelection videoFileSelection, textFileSelection;
-
-	private String[] EDITCHANGE = {"Edit", "Change"};
-
-	private int rowToEdit;
 
 	public static TextEditPanel getInstance() {
 		if (theInstance == null) {
@@ -103,8 +84,6 @@ public class TextEditPanel extends JPanel implements ActionListener {
 
 		title = BorderFactory.createTitledBorder("Text Editing");
 		setBorder(title);
-
-		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 
 		videoFileSelection = new VideoFileSelection();
 		textFileSelection = new TextFileSelection();
@@ -157,70 +136,6 @@ public class TextEditPanel extends JPanel implements ActionListener {
 		Font font = textLabel.getFont().deriveFont(Font.BOLD, 14f);
 		textLabel.setFont(font);
 
-		startButton = new JButton("Start");
-
-		startButton.setForeground(Color.WHITE);
-		startButton.setBackground(new Color(59, 89, 182)); // blue
-
-		endButton = new JButton("End");
-
-		endButton.setForeground(Color.WHITE);
-		endButton.setBackground(new Color(59, 89, 182)); // blue
-
-		// http://stackoverflow.com/questions/972194/zero-padding-a-spinner-in-java
-		startSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		startSpinnerSeconds.setEditor(new JSpinner.NumberEditor(startSpinnerSeconds, "00"));
-		JComponent editor = startSpinnerSeconds.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		startSpinnerMinutes = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		startSpinnerMinutes.setEditor(new JSpinner.NumberEditor(startSpinnerMinutes, "00"));
-
-		editor = startSpinnerMinutes.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		startSpinnerHours = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1));
-		startSpinnerHours.setEditor(new JSpinner.NumberEditor(startSpinnerHours, "00"));
-
-		editor = startSpinnerHours.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		endSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		endSpinnerSeconds.setEditor(new JSpinner.NumberEditor(endSpinnerSeconds, "00"));
-
-		editor = endSpinnerSeconds.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		endSpinnerMinutes = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		endSpinnerMinutes.setEditor(new JSpinner.NumberEditor(endSpinnerMinutes, "00"));
-
-		editor = endSpinnerMinutes.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
-		endSpinnerHours = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1));
-		endSpinnerHours.setEditor(new JSpinner.NumberEditor(endSpinnerHours, "00"));
-
-		editor = endSpinnerHours.getEditor();
-
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-
 		optionPanel.add(textLabel, "wrap 20px");
 		optionPanel.add(fontCombo, "split 3"); // split the cell in 3. this is so 3 components go into same cell
 		optionPanel.add(fontSizeCombo);
@@ -243,18 +158,6 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	private void setTablePanel() {
 		tablePanel = new JPanel(new MigLayout());
 
-		// Override cell editable.
-		model = new DefaultTableModel() {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-
-		table = new JTable(model);
-		table.setFillsViewportHeight(true);
-		tableScroll = new JScrollPane(table);
-
 		model.addColumn("Start");
 		model.addColumn("End");
 		model.addColumn("Text");
@@ -275,15 +178,6 @@ public class TextEditPanel extends JPanel implements ActionListener {
 
 		saveButton = new JButton("Save Video");
 		saveButton.setBackground(new Color(219, 219, 219)); // light grey
-
-		addButton = new JButton("Add");
-		addButton.setBackground(new Color(219, 219, 219)); // light grey
-
-		editChangeButton = new JButton(EDITCHANGE[0]);
-		editChangeButton.setBackground(new Color(219, 219, 219)); // light grey
-
-		deleteButton = new JButton("Delete");
-		deleteButton.setBackground(new Color(219, 219, 219)); // light grey
 
 		saveWorkButton = new JButton("Save Work");
 		saveWorkButton.setBackground(new Color(219, 219, 219)); // light grey
@@ -477,31 +371,6 @@ public class TextEditPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	/**
-	 * Sets the values for the start JSpinners. Input must be formatted time hh:mm:ss or exception will be thrown.
-	 * @param formattedTime
-	 */
-
-	private void setStartTime(String formattedTime) {
-		String[] firstTime = formattedTime.split(":");
-		startSpinnerHours.setValue(Integer.parseInt(firstTime[0]));
-		startSpinnerMinutes.setValue(Integer.parseInt(firstTime[1]));
-		startSpinnerSeconds.setValue(Integer.parseInt(firstTime[2]));
-	}
-
-	/**
-	 * Sets the values for the end JSpinners. Input must be formatted time hh:mm:ss or exception will be thrown.
-	 * @param formattedTime
-	 */
-
-	private void setEndTime(String formattedTime) {
-		String[] secondTime = formattedTime.split(":");
-
-		endSpinnerHours.setValue(Integer.parseInt(secondTime[0]));
-		endSpinnerMinutes.setValue(Integer.parseInt(secondTime[1]));
-		endSpinnerSeconds.setValue(Integer.parseInt(secondTime[2]));
-	}
-
 	private Object[] getFilterData() {
 		Object[] data = new Object[8];
 
@@ -523,37 +392,6 @@ public class TextEditPanel extends JPanel implements ActionListener {
 		data[7] = yTextField.getText();
 
 		return data;
-	}
-
-	/**
-	 * Checks if the table needs sorting.
-	 * @return is sorting needed
-	 */
-
-	private boolean needSorting() {
-		if (model.getRowCount() > 1) {
-			// Determines if the row needs to be changed.
-			RowSort sorter = new RowSort();
-			Object o1 = model.getDataVector().get(model.getRowCount() - 1);
-			Object o2 = model.getDataVector().get(model.getRowCount() - 2);
-
-			if (sorter.compare(o1, o2) == -1) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Sorts the rows to be sorted and then calls fireTableDataChanged to notify all listeners that data has been changed.
-	 */
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void sortData() {
-		Vector data = model.getDataVector();
-		Collections.sort(data, new RowSort());
-		model.fireTableDataChanged();
 	}
 
 	/**
