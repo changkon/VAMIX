@@ -15,71 +15,49 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSpinner.DefaultEditor;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ProgressMonitor;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
 import operation.MediaTimer;
 import operation.SubtitleFileSelection;
 import operation.VamixProcesses;
 import res.MediaIcon;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.SubtitleWorker;
 
 import component.Playback;
-import component.RowSort;
 
 @SuppressWarnings("serial")
-public class SubtitlePanel extends JPanel implements ActionListener {
+public class SubtitlePanel extends SpinnerTableTemplatePanel implements ActionListener {
 	private static SubtitlePanel theInstance = null;
 	private TitledBorder title;
 	
 	private JPanel menuPanel, tablePanel, buttonPanel, navigationPanel;
 
-	private JButton importButton, addButton, editChangeButton, deleteButton, startButton, endButton, saveSubtitleButton, addSubtitleToVideoButton, leftButton;
-
-	private JSpinner startSpinnerSeconds, startSpinnerMinutes, startSpinnerHours, endSpinnerSeconds, endSpinnerMinutes, endSpinnerHours;
+	private JButton importButton, saveSubtitleButton, addSubtitleToVideoButton, leftButton;
 
 	private JTextArea textArea;
 
-	private JTable table;
-
-	private JScrollPane textScroll, tableScroll;
+	private JScrollPane textScroll;
 
 	private JLabel subtitleLabel, textLabel;
-	
-	private DefaultTableModel model;
-
-	private final String[] EDITCHANGE = {"Edit", "Change"};
 
 	private Pattern p;
-
-	private int rowToEdit;
 	
 	private SubtitleFileSelection subtitleFileSelection;
-	
-	private EmbeddedMediaPlayer mediaPlayer;
 	
 	public static SubtitlePanel getInstance() {
 		if (theInstance == null) {
@@ -93,8 +71,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 		title = BorderFactory.createTitledBorder("Subtitle");
 		setBorder(title);
-		
-		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
 		
 		setMenuPanel();
 		setTablePanel();
@@ -129,70 +105,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		importButton.setForeground(Color.WHITE);
 		importButton.setBackground(new Color(59, 89, 182)); // blue
 		
-		startButton = new JButton("Start");
-		
-		startButton.setForeground(Color.WHITE);
-		startButton.setBackground(new Color(59, 89, 182)); // blue
-		
-		endButton = new JButton("End");
-		
-		endButton.setForeground(Color.WHITE);
-		endButton.setBackground(new Color(59, 89, 182)); // blue
-		
-		// http://stackoverflow.com/questions/972194/zero-padding-a-spinner-in-java
-		startSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		startSpinnerSeconds.setEditor(new JSpinner.NumberEditor(startSpinnerSeconds, "00"));
-		JComponent editor = startSpinnerSeconds.getEditor();
-		
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
-		startSpinnerMinutes = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		startSpinnerMinutes.setEditor(new JSpinner.NumberEditor(startSpinnerMinutes, "00"));
-		
-		editor = startSpinnerMinutes.getEditor();
-		
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
-		startSpinnerHours = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1));
-		startSpinnerHours.setEditor(new JSpinner.NumberEditor(startSpinnerHours, "00"));
-
-		editor = startSpinnerHours.getEditor();
-		
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
-		endSpinnerSeconds = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		endSpinnerSeconds.setEditor(new JSpinner.NumberEditor(endSpinnerSeconds, "00"));
-		
-		editor = endSpinnerSeconds.getEditor();
-		
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
-		endSpinnerMinutes = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
-		endSpinnerMinutes.setEditor(new JSpinner.NumberEditor(endSpinnerMinutes, "00"));
-		
-		editor = endSpinnerMinutes.getEditor();
-		
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
-		endSpinnerHours = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1));
-		endSpinnerHours.setEditor(new JSpinner.NumberEditor(endSpinnerHours, "00"));
-
-		editor = endSpinnerHours.getEditor();
-		
-		if (editor instanceof DefaultEditor) {
-			((DefaultEditor)editor).getTextField().setEditable(false);
-		}
-		
 		textArea = new JTextArea();
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
@@ -218,18 +130,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	private void setTablePanel() {
 		tablePanel = new JPanel(new MigLayout());
 
-		// Override cell editable.
-		model = new DefaultTableModel() {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-
-		table = new JTable(model);
-		table.setFillsViewportHeight(true);
-		tableScroll = new JScrollPane(table);
-
 		model.addColumn("Start Time");
 		model.addColumn("End Time");
 		model.addColumn("Text");
@@ -239,15 +139,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 
 	private void setButtonPanel() {
 		buttonPanel = new JPanel(new MigLayout());
-		
-		addButton = new JButton("Add");
-		addButton.setBackground(new Color(219, 219, 219)); // light grey
-		
-		editChangeButton = new JButton(EDITCHANGE[0]);
-		editChangeButton.setBackground(new Color(219, 219, 219)); // light grey
-		
-		deleteButton = new JButton("Delete");
-		deleteButton.setBackground(new Color(219, 219, 219)); // light grey
 		
 		saveSubtitleButton = new JButton("Save Subtitle");
 		saveSubtitleButton.setBackground(new Color(219, 219, 219)); // light grey
@@ -337,6 +228,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 					addSubtitleToVideoButton.setEnabled(false);
 					importButton.setEnabled(false);
 					
+					// Load the values selected to the jspinners and textarea.
 					Object[] values = getVectorValue(model.getDataVector().get(selection));
 					
 					setStartTime(values[0].toString());
@@ -363,7 +255,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		} else if (e.getSource() == deleteButton) {
 			int selection = table.getSelectedRow();
 			if (selection == -1) {
-				JOptionPane.showMessageDialog(null, "Please select a row to delete");
+				JOptionPane.showMessageDialog(null, "Please select a subtitle to delete");
 			} else {
 				model.removeRow(selection);
 			}
@@ -403,7 +295,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	}
 	
 	/**
-	 * 
+	 * Get the input subtitle file and then output a video file with a subtitle stream.
 	 */
 	
 	private void executeAddSubtitle() {
@@ -430,6 +322,11 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 			
 		}
 	}
+	
+	/**
+	 * Reads the subtitle and adds the values to the table.
+	 * @param inputFilename
+	 */
 	
 	private void addData(String inputFilename) {
 		model.setNumRows(0);
@@ -480,31 +377,6 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 			e.printStackTrace();
 		}
 	}
-
-	/**
-	 * Sets the values for the start JSpinners. Input must be formatted time hh:mm:ss or exception will be thrown.
-	 * @param formattedTime
-	 */
-	
-	private void setStartTime(String formattedTime) {
-		String[] firstTime = formattedTime.split(":");
-		startSpinnerHours.setValue(Integer.parseInt(firstTime[0]));
-		startSpinnerMinutes.setValue(Integer.parseInt(firstTime[1]));
-		startSpinnerSeconds.setValue(Integer.parseInt(firstTime[2]));
-	}
-	
-	/**
-	 * Sets the values for the end JSpinners. Input must be formatted time hh:mm:ss or exception will be thrown.
-	 * @param formattedTime
-	 */
-	
-	private void setEndTime(String formattedTime) {
-		String[] secondTime = formattedTime.split(":");
-
-		endSpinnerHours.setValue(Integer.parseInt(secondTime[0]));
-		endSpinnerMinutes.setValue(Integer.parseInt(secondTime[1]));
-		endSpinnerSeconds.setValue(Integer.parseInt(secondTime[2]));
-	}
 	
 	/**
 	 * Returns the data values from the starttime, endtime and textarea.
@@ -524,7 +396,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	/**
 	 * Returns value from a vector.
 	 * @param v
-	 * @return
+	 * @return Object[] containing start time, end time and text.
 	 */
 	
 	private Object[] getVectorValue(Object o) {
@@ -556,42 +428,11 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		
 		return values;
 	}
-	
-	/**
-	 * Checks if the table needs sorting.
-	 * @return is sorting needed
-	 */
-
-	private boolean needSorting() {
-		if (model.getRowCount() > 1) {
-			// Determines if the row needs to be changed.
-			RowSort sorter = new RowSort();
-			Object o1 = model.getDataVector().get(model.getRowCount() - 1);
-			Object o2 = model.getDataVector().get(model.getRowCount() - 2);
-
-			if (sorter.compare(o1, o2) == -1) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Sorts the rows to be sorted and then calls fireTableDataChanged to notify all listeners that data has been changed.
-	 */
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void sortData() {
-		Vector data = model.getDataVector();
-		Collections.sort(data, new RowSort());
-		model.fireTableDataChanged();
-	}
 
 	/**
 	 * Determines if the line being read is an integer.
 	 * @param s
-	 * @return
+	 * @return is the line being read an integer
 	 */
 
 	private boolean isInteger(String s) {
@@ -622,13 +463,18 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 		return false;
 	}
 	
+	/**
+	 * Saves the subtitle to an output name.
+	 * @param filename
+	 */
+	
 	private void saveSubtitle(String filename) {
 		File file = new File(filename);
 		
 		if (file.exists()) {
 			file.delete();
 		}
-		
+
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
 			int counter = 1;
@@ -644,6 +490,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 				
 			}
 			writer.close();
+			JOptionPane.showMessageDialog(null, "Subtitle has been saved.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

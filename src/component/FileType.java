@@ -9,7 +9,7 @@ package component;
 public enum FileType {
 	AUDIO(new String[] {"audio", "Audio"}),
 	VIDEO(new String[] {"video", "ISO Media", "Matroska", "AVI"}),
-	TEXT(new String[] {"ASCII text"});
+	TEXT(new String[] {"ASCII text", "UTF-8"});
 	
 	private String[] type;
 	
