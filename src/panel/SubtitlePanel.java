@@ -114,7 +114,7 @@ public class SubtitlePanel extends JPanel implements ActionListener {
 	private void setMenuPanel() {
 		menuPanel = new JPanel(new MigLayout());
 
-		subtitleLabel = new JLabel("Add desired text to subtitles to add to video.");
+		subtitleLabel = new JLabel("Add desired text to subtitle.");
 		// Sets new font for subtitleLabel.
 		Font subtitleFont = subtitleLabel.getFont().deriveFont(Font.BOLD, 14f);
 		subtitleLabel.setFont(subtitleFont);

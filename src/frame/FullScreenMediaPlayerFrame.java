@@ -119,7 +119,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 	public void setFullScreen() {
 		if (g.isFullScreenSupported()) {
 			if (!mediaPanelMediaPlayer.isPlayable()) {
-				JOptionPane.showMessageDialog(null, "Please parse media");
+				JOptionPane.showMessageDialog(null, "Media file must be playing first before entering fullscreen.");
 				return;
 			}
 

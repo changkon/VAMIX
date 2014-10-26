@@ -234,11 +234,6 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 					String length = MediaTimer.getFormattedTime(mediaPlayer.getLength());
 
-					// if length comes back in the format, mm:ss. Have to add 00: so that it is in correct format.
-					if (length.length() == 5) {
-						length = "00:" + length;
-					}
-
 					executeExtract(VamixProcesses.getFilename(mediaPlayer.mrl()), outputFilename, "00:00:00", length);
 
 				}
@@ -255,7 +250,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 				File audioFile = new File(selectedAudioReplaceFileTextField.getText());
 
 				String audioPath = audioFile.getAbsolutePath();
-				String videoPath = audioFileSelection.getInputFilename();
+				String videoPath = videoFileSelection.getOutputFilename();
 
 				if (videoPath != null) {
 					executeReplace(VamixProcesses.getFilename(mediaPlayer.mrl()), audioPath, videoPath);

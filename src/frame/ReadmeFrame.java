@@ -52,8 +52,7 @@ public class ReadmeFrame extends JFrame {
 	}
 	
 	private void addText() {
-		String path = System.getProperty("user.dir") + "/README.md";
-		File readme = new File(path);
+		File readme = new File(getClass().getClassLoader().getResource("README.md").getFile());
 		
 		try {
 			InputStream in = new FileInputStream(readme);
