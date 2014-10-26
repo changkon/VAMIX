@@ -7,7 +7,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * Updates the table with correct progress value. </br>
+ * Updates the table with correct progress value. <br/>
  * {@link panel.DownloadPanel}
  * @author chang
  *

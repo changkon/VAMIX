@@ -52,10 +52,7 @@ import component.MyStyledDocument;
 import component.MyTextFieldFilter;
 import component.Playback;
 import component.RowSort;
-/**
- * Singleton design pattern. Panel contains anything related to filter editing of video.
- * 
- */
+
 /**
  * Singleton design pattern. Panel contains anything related to filter editing of video.
  * 
@@ -375,7 +372,7 @@ public class TextEditPanel extends JPanel implements ActionListener {
 				if (selection == -1) {
 					JOptionPane.showMessageDialog(null, "Select text filter to preview");
 				} else {
-					executeFilterPreview();
+					executeFilterPreview(selection);
 				}
 			}
 		} else if (e.getSource() == addButton) {
@@ -586,8 +583,26 @@ public class TextEditPanel extends JPanel implements ActionListener {
 	 * Executes FilterPreviewWorker. Previews the selected text edit.
 	 */
 
-	private void executeFilterPreview() {
-		TextFilterPreviewWorker worker = new TextFilterPreviewWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), getFilterData());
+	private void executeFilterPreview(int selection) {
+		Object[] data = new Object[8];
+		// Start Time
+		data[0] = model.getValueAt(selection, 0);
+		// End Time
+		data[1] = model.getValueAt(selection, 1);
+		// Text
+		data[2] = model.getValueAt(selection, 2);
+		// Font
+		data[3] = model.getValueAt(selection, 3);
+		// Font Size
+		data[4] = model.getValueAt(selection, 4);
+		// Font Colour
+		data[5] = model.getValueAt(selection, 5);
+		// x
+		data[6] = model.getValueAt(selection, 6);
+		// y
+		data[7] = model.getValueAt(selection, 7);
+		
+		TextFilterPreviewWorker worker = new TextFilterPreviewWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), data);
 		worker.execute();
 	}
 

@@ -8,8 +8,7 @@ import java.io.IOException;
 import operation.VamixProcesses;
 
 /**
- * 
- * Contains a directory to the font file.
+ * Collection of font ready used for filters. {@link panel.TextEditPanel} {@link operation.VamixProcesses}
  */
 
 public enum FilterFont {

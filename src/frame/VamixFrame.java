@@ -16,13 +16,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import panel.AudioFilterPanel;
 import panel.DownloadPanel;
 import panel.MainPanel;
 import panel.MediaPanel;
 import panel.MediaPlayerComponentPanel;
 import panel.PlaybackPanel;
-import panel.VideoFilterPanel;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 
 /**
@@ -53,7 +51,7 @@ public class VamixFrame extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setMinimumSize(new Dimension(1400, 950));
 		setPreferredSize(new Dimension(1400, 950));
-		setResizable(false); // change later but at the moment, make it not resizable.
+		setResizable(false);
 		
 		setMenuBar();
 		setJMenuBar(menuBar);

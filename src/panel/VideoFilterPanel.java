@@ -4,6 +4,13 @@ import java.awt.CardLayout;
 
 import javax.swing.JPanel;
 
+/**
+ * Panel which contains all the video filter panels. Used in mainPanel. {@link panel.MainPanel}
+ * @author chang
+ *
+ */
+
+@SuppressWarnings("serial")
 public class VideoFilterPanel extends JPanel {
 	private static VideoFilterPanel theInstance = null;
 	

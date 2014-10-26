@@ -7,7 +7,8 @@ import java.util.regex.Pattern;
 import operation.MediaTimer;
 
 /**
- * Used to sort the data values in the JTable. It accepts strings in the format hh:mm:ss or else it will throw an exception.
+ * Used to sort the data values in the JTable. It accepts strings in the format hh:mm:ss or else it will throw an exception. <br/>
+ * User in tables found in : {@link panel.TextEditPanel} {@link panel.VideoFilterPanel} {@link panel.SubtitlePanel}
  * @author chang
  *
  */
@@ -24,6 +25,9 @@ public class RowSort implements Comparator<Object> {
 		Matcher m;
 		Pattern p = Pattern.compile("\\d\\d:\\d\\d:\\d\\d");
 		m = p.matcher(split1[0]);
+		
+		// Check the start times.
+		
 		if (m.find()) {
 			firstTime = MediaTimer.getSeconds(m.group());
 		}
@@ -38,7 +42,7 @@ public class RowSort implements Comparator<Object> {
 		} else if (secondTime > firstTime) {
 			return -1;
 		} else {
-
+			// Start times were the same. Check the end times.
 			m = p.matcher(split1[1]);
 
 			if (m.find()) {

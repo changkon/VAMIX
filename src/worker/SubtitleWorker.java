@@ -2,6 +2,12 @@ package worker;
 
 import javax.swing.ProgressMonitor;
 
+/**
+ * Create a new video with a subtitle stream.
+ * @author chang
+ *
+ */
+
 public class SubtitleWorker extends DefaultWorker {
 	private String inputVideo, inputSubtitle, outputVideo;
 	

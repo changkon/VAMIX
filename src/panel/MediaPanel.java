@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 
 /**
  * 
- * Singleton design pattern. Responsible for displaying media player and the playbackPanel.
+ * Singleton design pattern. Responsible for displaying media player and the playbackPanel for the mainPanel.
  *
  */
 

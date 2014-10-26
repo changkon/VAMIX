@@ -15,7 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
- * Opens the readme document in a JTextArea.
+ * Opens the readme document in a JTextArea. This file is accessed from VamixFrame. {@link frame.VamixFrame}
  * @author chang
  *
  */

@@ -50,7 +50,7 @@ public class TextFilterPreviewWorker extends SwingWorker<Void, Void> {
 		String line = "";
 		int currentTime = 0;
 
-		// Get strings which have this format which contains the current time and extract only seconds.
+		// Get strings which have this format, which contains the current time and extract only seconds.
 		Pattern p = Pattern.compile("\\d+[.]\\d\\d A-V");
 		Matcher m;
 
@@ -60,12 +60,15 @@ public class TextFilterPreviewWorker extends SwingWorker<Void, Void> {
 			if (m.find()) {
 				String[] splitPattern = m.group().split("\\.");
 
-				currentTime = Integer.parseInt(splitPattern[0]); // Only get the first number.
+				currentTime = Integer.parseInt(splitPattern[0]); // Only get the first number, milliseconds are ignored.
 
+				// If the current time matches the end time of the filter effect, kill the avplay popup frame.
+				// This is so users don't need to keep watching video.
 				if (currentTime == MediaTimer.getSeconds(data[1].toString())) {
 
-					// Sleep for 1 second in case video is fraction of a second longer.
-					Thread.sleep(1000);
+					// Sleep for 1.5 second before killing process. This is so users can see the text filter has finished.
+					// 1.5 seconds is also a good value if the text edit was used for the entire video as milliseconds is ignored.
+					Thread.sleep(1500);
 					process.destroy();
 					break;
 				}

@@ -216,7 +216,7 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		deleteButton = new JButton("Delete");
 		deleteButton.setBackground(new Color(219, 219, 219)); // light grey
 		
-		tablePanel.add(tableScroll, "pushx, growx, wrap 30px");
+		tablePanel.add(tableScroll, "height 100px, pushx, growx, wrap 30px");
 		tablePanel.add(addButton, "split 3, align center");
 		tablePanel.add(editChangeButton);
 		tablePanel.add(deleteButton);
@@ -370,8 +370,12 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		return data;
 	}
 	
-	private void executeFadeFilterPreview() {
-		FadeFilterPreviewWorker worker = new FadeFilterPreviewWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), getFadeData(), mediaPlayer.getFps());
+	private void executeFadeFilterPreview(int selection) {
+		Object[] data = new Object[3];
+		data[0] = model.getValueAt(selection, 0);
+		data[1] = model.getValueAt(selection, 1);
+		data[2] = model.getValueAt(selection, 2);
+		FadeFilterPreviewWorker worker = new FadeFilterPreviewWorker(VamixProcesses.getFilename(mediaPlayer.mrl()), data, mediaPlayer.getFps());
 		worker.execute();
 	}
 	
@@ -407,7 +411,7 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 				if (selection == -1) {
 					JOptionPane.showMessageDialog(null, "Select fade filter to preview");
 				} else {
-					executeFadeFilterPreview();
+					executeFadeFilterPreview(selection);
 				}
 			}
 		} else if (e.getSource() == saveButton) {
@@ -439,12 +443,15 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 					
 					rowToEdit = selection;
 					
+					fadeCombo.setSelectedItem(model.getValueAt(selection, 2));
+					
 					addButton.setEnabled(false);
 					deleteButton.setEnabled(false);
 					previewButton.setEnabled(false);
 					saveButton.setEnabled(false);
 					saveWorkButton.setEnabled(false);
 					loadWorkButton.setEnabled(false);
+					fadeCombo.setEnabled(false);
 				} else {
 					if (verifyData()) {
 						editChangeButton.setText(EDITCHANGE[0]);
@@ -455,6 +462,7 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 						saveButton.setEnabled(true);
 						saveWorkButton.setEnabled(true);
 						loadWorkButton.setEnabled(true);
+						fadeCombo.setEnabled(true);
 						
 						Object[] data = getFadeData();
 						
@@ -529,13 +537,29 @@ public class FadeFilterPanel extends JPanel implements ActionListener {
 		String endTime = MediaTimer.getFormattedTime((int)endSpinnerHours.getValue(), (int)endSpinnerMinutes.getValue(), (int)endSpinnerSeconds.getValue());
 		int difference = MediaTimer.getSeconds(endTime) - MediaTimer.getSeconds(startTime);
 		
-		if (difference > 0) {
-			return true;
+		if (difference <= 0) {
+			JOptionPane.showMessageDialog(null, "Please make sure that the end time is later than the start time.");
+			return false;
 		}
 		
-		JOptionPane.showMessageDialog(null, "Please make sure that the end time is later than the start time.");
+		// Checking arbitrary button to see if this should be checked. I check if button is enabled to make sure if value is being edited or not.
+		// If the value is being edited, this should be ignored.
+		if (saveWorkButton.isEnabled()) {
+			String fadeType = (String)fadeCombo.getSelectedItem();
+			
+			if (model.getRowCount() > 0) {
+				for (Object element : model.getDataVector()) {
+					Vector v = (Vector)element;
+					Object value = v.get(2);
+					if (value.equals(fadeType)) {
+						JOptionPane.showMessageDialog(null, "Cannot add duplicate fade types to a video");
+						return false;
+					}
+				}
+			}
+		}
 		
-		return false;
+		return true;
 	}
 	
 	/**

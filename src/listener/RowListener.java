@@ -6,7 +6,7 @@ import javax.swing.table.TableModel;
 
 /**
  * Responsible for updating the table whenever the table is deleted. This is important so that the table is not updating an invalid
- * row which will cause an exception.
+ * row which will cause an exception. {@link panel.DownloadPanel}
  * @author chang
  *
  */

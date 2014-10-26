@@ -19,7 +19,7 @@ import panel.DownloadPanel;
 import listener.RowListener;
 
 /**
- * Downloads file online using wget.
+ * Downloads file online using wget. {@link listener.RowListener} {@link panel.DownloadPanel}
  * @author chang
  *
  */
@@ -106,7 +106,7 @@ public class DownloadWorker extends SwingWorker<Void, Integer[]> {
 		// Update row index if it has been changed.
 		// Only update JTable if the process is not done. If it is, then don't update JTable as it will throw an exception.
 		if (!isDone()) {
-			// Update the jprogressbar and jlabel to show correct information to user.
+			// Update the values displayed on JTable.
 			for (Integer[] element : chunks) {
 				model.setValueAt(element[0], rowListener.getRow(), 1);
 				model.setValueAt(element[1] + "s", rowListener.getRow(), 2);

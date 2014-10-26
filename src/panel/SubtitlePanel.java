@@ -29,10 +29,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.ProgressMonitor;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ProgressMonitor;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -40,13 +40,13 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
-import operation.FileSelection;
 import operation.MediaTimer;
 import operation.SubtitleFileSelection;
 import operation.VamixProcesses;
 import res.MediaIcon;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import worker.SubtitleWorker;
+
 import component.Playback;
 import component.RowSort;
 

@@ -1,9 +1,7 @@
 package component;
 
 /**
- * 
  * Common media player commands saved as constants.
- *
  */
 
 public enum Playback {

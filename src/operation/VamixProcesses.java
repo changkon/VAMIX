@@ -67,10 +67,11 @@ public class VamixProcesses {
 	}
 
 	/**
-	 * Checks content type and returns if its valid.
+	 * Checks content type and returns if its valid. <br/>
+	 * {@link component.FileType}
 	 * @param type
 	 * @param path
-	 * @return
+	 * @return if file is valid type
 	 */
 
 	public static boolean validContentType(FileType type, String path) {
@@ -120,7 +121,7 @@ public class VamixProcesses {
 				return false;
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "No media recognized");
+			JOptionPane.showMessageDialog(null, "Media must be playing before starting process");
 			return false;
 		}
 
@@ -128,8 +129,8 @@ public class VamixProcesses {
 	}
 
 	/**
-	 * Determines if there is a media loaded onto player which is a video and contains an audio track. </br>
-	 * {@link panel.AudioFirstPagePanel} </br>
+	 * Determines if there is a media loaded onto player which is a video and contains an audio track. <br/>
+	 * {@link panel.AudioFirstPagePanel} <br/>
 	 * {@link panel.AudioSecondPagePanel}
 	 * @param mediaPlayer
 	 * @return boolean
@@ -156,7 +157,7 @@ public class VamixProcesses {
 				return false;
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "No media recognized");
+			JOptionPane.showMessageDialog(null, "Media must be playing to start process");
 			return false;
 		}
 

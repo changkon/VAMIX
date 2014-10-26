@@ -4,6 +4,12 @@ import java.awt.CardLayout;
 
 import javax.swing.JPanel;
 
+/**
+ * Contains the audio panels and stores them in a super panel using cardlayout. {@link panel.MainPanel}
+ * @author chang
+ *
+ */
+
 @SuppressWarnings("serial")
 public class AudioFilterPanel extends JPanel {
 	private static AudioFilterPanel theInstance = null;

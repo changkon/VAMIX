@@ -294,7 +294,7 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 
 	private void executeReplace(String videoInput, String audioInput, String videoOutput) {
 		int audioInputLength = VamixProcesses.probeDuration(audioInput);
-		int mediaPlayerLength = (int)mediaPlayer.getLength() / 1000;
+		int mediaPlayerLength = (int)(mediaPlayer.getLength() / 1000);
 		
 		ProgressMonitor monitor = new ProgressMonitor(null, "Replacing audio has started",
 				"In progress..", 0, Math.max(audioInputLength, mediaPlayerLength));
@@ -313,9 +313,11 @@ public class AudioFirstPagePanel extends JPanel implements ActionListener {
 	 */
 
 	private void executeOverlay(String videoInput, String audioInput, String videoOutput) {
-
+		int audioInputLength = VamixProcesses.probeDuration(audioInput);
+		int videoInputLength = (int)(mediaPlayer.getLength() / 1000);
+		
 		ProgressMonitor monitor = new ProgressMonitor(null, "Overlaying audio has started",
-				"In progress..", 0, 100);
+				"In progress..", 0, Math.max(audioInputLength, videoInputLength));
 
 		OverlayWorker worker = new OverlayWorker(videoInput, audioInput, videoOutput, monitor);
 		worker.execute();

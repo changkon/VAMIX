@@ -12,7 +12,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import component.FileType;
 
 /**
- * Class which deals with returning and getting strings of file selection (audio/video) by JFileChooser.
+ * Class which deals with returning and getting strings of file selection (audio/video/text) by JFileChooser.
  * @author chang
  *
  */
@@ -31,7 +31,7 @@ public abstract class FileSelection {
 	}
 	
 	/**
-	 * Returns the selected file.
+	 * Returns the selected file. Returns null if the user cancels selection.
 	 * @return file of specific type
 	 */
 	
@@ -53,7 +53,7 @@ public abstract class FileSelection {
 
 			String inputFilename = saveFile.getAbsolutePath();
 
-			// Checks that the audio file is an audio file or else it displays an error message.
+			// Checks that the file is the correct file or else it displays an error message.
 			if (!VamixProcesses.validContentType(fileType, inputFilename)) {
 				JOptionPane.showMessageDialog(null, inputFilename + warningMessage);
 				return null;
@@ -67,7 +67,7 @@ public abstract class FileSelection {
 	/**
 	 * Returns the output filename. Asks user if overwrite is desired if same file exists. </br>
 	 * Returns null if user cancels selection or does not want to overwrite.
-	 * @return String
+	 * @return filename of output file
 	 */
 
 	public String getOutputFilename() {
@@ -89,9 +89,8 @@ public abstract class FileSelection {
 			String outputFilename = saveFile.getAbsolutePath();
 
 			/*
-			 * Even though the extension type is listed below, sometimes users still add .mp3 to the end of the file so this
-			 * makes sure that when I add extension type to the filename, I only add .mp3 if it's not already there.
-			 * 
+			 * Check the output filename and adds the correct extension type. If the output filename already has the extension added, it
+			 * doesn't append extension again.
 			 */
 			
 			for (String[] element : outputFilterList) {

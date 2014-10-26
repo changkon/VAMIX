@@ -49,8 +49,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 
 	private JLayeredPane layeredPane;
 	
-	private EmbeddedMediaPlayer mediaPanelMediaPlayer;
-	private EmbeddedMediaPlayer mediaPlayer;
+	private EmbeddedMediaPlayer mediaPanelMediaPlayer, mediaPlayer;
 
 	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
 
@@ -139,7 +138,7 @@ public class FullScreenMediaPlayerFrame extends JFrame implements ActionListener
 			g.setFullScreenWindow(this);
 			
 			// Play the media with the correct time.
-			mediaPlayer.playMedia(mediaPath, ":start-time=" + mediaPanelMediaPlayer.getTime() / 1000);
+			mediaPlayer.playMedia(mediaPath, ":start-time=" + (mediaPanelMediaPlayer.getTime() / 1000));
 			
 			playbackPanel.volumeSlider.setValue(mediaPanelMediaPlayer.getVolume());
 

@@ -36,7 +36,7 @@ import component.Playback;
 import frame.FullScreenMediaPlayerFrame;
 
 /**
- * The panel responsible to control playback for mediaPlayer. Because it controls some mediaPlayer, it must be linked to some mediaPlayer during constructor. </br>
+ * The panel responsible to control playback for mediaPlayer. Because it controls some mediaPlayer, it must be linked to some mediaPlayer during constructor. <br/>
  * {@link panel.MediaPlayerComponentPanel}
  * @author changkon
  *
@@ -318,6 +318,7 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			
 		});
 		
+		// When user hovers over time slider, show the time at that position.
 		timeSlider.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
@@ -348,7 +349,6 @@ public class PlaybackPanel extends JPanel implements ActionListener, ChangeListe
 			if (VamixProcesses.validContentType(FileType.VIDEO, selectedFile.getPath()) || VamixProcesses.validContentType(FileType.AUDIO, selectedFile.getPath())) {
 				// Start files from the start.
 				mediaPlayer.playMedia(selectedFile.getPath(), ":start-time=0");
-//				FilterPanel.getInstance().checkLog(selectedFile.toString());
 			} else {
 				JOptionPane.showMessageDialog(null, "Not a valid media file! Please choose another file.");
 			}

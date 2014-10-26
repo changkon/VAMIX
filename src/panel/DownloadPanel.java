@@ -170,7 +170,7 @@ public class DownloadPanel extends JPanel implements ActionListener {
 			
 			// Check that url is given.
 			if (url.equals("")) {
-				JOptionPane.showMessageDialog(null, "Please input link");
+				JOptionPane.showMessageDialog(null, "Please input URL link");
 				return;
 			}
 			
@@ -234,8 +234,8 @@ public class DownloadPanel extends JPanel implements ActionListener {
 	 */
 	
 	private boolean validURLCheck(String url) throws IOException {
-		//check if the URL is vlaid
-		//does not download only returns the URL informaiton
+		// check if the URL is valid
+		// does not download only returns the URL information
 		ProcessBuilder builder = new ProcessBuilder("/bin/bash","-c","wget --spider -v \'" + url + "\'");
 		Process process = builder.start();		
 		String stdOutput = null;
@@ -248,13 +248,13 @@ public class DownloadPanel extends JPanel implements ActionListener {
 		BufferedReader stdout = new BufferedReader(new InputStreamReader(out));
 		
 		stdOutput = stdout.readLine();
-		while(stdOutput != null && !stdOutput.equals("") && !(stdOutput.length() == 0)){
+		while (stdOutput != null && !stdOutput.equals("") && !(stdOutput.length() == 0)) {
 			lastOutput = stdOutput;
 			stdOutput = stdout.readLine();
 		}
 		
-		//if the last line is "Remote file exists." the file is a valid media file
-		if(lastOutput.equals("Remote file exists.")){
+		// if the last line is "Remote file exists." the file is a valid media file
+		if (lastOutput.equals("Remote file exists.")) {
 			return true;
 		} else {
 			return false;

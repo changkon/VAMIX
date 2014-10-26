@@ -8,16 +8,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
 public class LogSession {
+	// Arbitrary separator value. Selected as it is an unlikely pattern.
 	private static final String SEPARATORVALUE = ",;;,";
 	
 	/**
-	 * 
+	 * Saves the data given to a text file. Separates each value by the separator value.
 	 * @param filename
 	 * @param type
 	 * @param data
@@ -55,7 +55,7 @@ public class LogSession {
 	}
 	
 	/**
-	 * 
+	 * Reads the text file and returns the values back. If the text file is incorrect log file, return null.
 	 * @param filename
 	 * @param type
 	 * @return
@@ -76,8 +76,12 @@ public class LogSession {
 					list.add(split);
 				}
 				
+				buffer.close();
+				
 				return list;
 			} else {
+				
+				buffer.close();
 				JOptionPane.showMessageDialog(null, "Incorrect log text. Cannot load work");
 			}
 		} catch (FileNotFoundException e) {

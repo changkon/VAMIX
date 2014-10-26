@@ -3,7 +3,6 @@ package operation;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 
  * Responsible for converting time into formatted version and vice versa.
  */
 
@@ -25,7 +24,7 @@ public class MediaTimer {
 	/**
 	 * Returns a formatted string for the time to display correct time in media player. hh:mm:ss or mm:ss
 	 * @param time
-	 * @return
+	 * @return formatted time. hh:mm:ss or mm:ss
 	 */
 	
 	public static String getMediaTime(long time) {
@@ -43,7 +42,7 @@ public class MediaTimer {
 	 * @param hours
 	 * @param minutes
 	 * @param seconds
-	 * @return
+	 * @return formatted string. hh:mm:ss
 	 */
 	
 	public static String getFormattedTime(int hours, int minutes, int seconds) {
@@ -53,7 +52,7 @@ public class MediaTimer {
 	/**
 	 * Returns amount of seconds from hh:mm:ss format.
 	 * @param formattedTime
-	 * @return
+	 * @return number of seconds in hh:mm:ss time
 	 */
 	
 	public static int getSeconds(String formattedTime) {
@@ -98,7 +97,7 @@ public class MediaTimer {
 	 * Returns the current frame of the video.
 	 * @param videoSeconds
 	 * @param frameRate
-	 * @return
+	 * @return current frame
 	 */
 	
 	public static float getCurrentFrame(String formattedTime, float frameRate) {

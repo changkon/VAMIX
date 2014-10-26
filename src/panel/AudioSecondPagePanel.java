@@ -46,7 +46,7 @@ import component.Playback;
 public class AudioSecondPagePanel extends JPanel implements ActionListener {
 	private static AudioSecondPagePanel theInstance = null;
 	
-	private EmbeddedMediaPlayer mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
+	private EmbeddedMediaPlayer mediaPlayer;
 	private TitledBorder title;
 	
 	private JPanel audioTrackPanel = new JPanel(new MigLayout());
@@ -78,6 +78,8 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 		title = BorderFactory.createTitledBorder("Audio Second Page");
 		setBorder(title);
 		
+		mediaPlayer = MediaPanel.getInstance().getMediaPlayerComponentPanel().getMediaPlayer();
+		
 		setAudioVolumePanel();
 		setAudioTrackPanel();
 		setNavigationPanel();
@@ -106,6 +108,7 @@ public class AudioSecondPagePanel extends JPanel implements ActionListener {
 		
 		JComponent editor = audioVolumeSpinner.getEditor();
 		
+		// set the size of the spinner.
 		if (editor instanceof DefaultEditor) {
 			((DefaultEditor)editor).getTextField().setColumns(3);
 			((DefaultEditor)editor).getTextField().setEditable(false);

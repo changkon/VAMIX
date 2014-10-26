@@ -13,6 +13,13 @@ import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
+/**
+ * Template for other swingworkers to subclass. Most avconv commands output progress. The progress is output to a Progress Monitor
+ * by setting its value. The progress of the avconv progress is determined by finding the value for time.
+ * @author chang
+ *
+ */
+
 public abstract class DefaultWorker extends SwingWorker<Void, Integer> {
 	protected String command, successMessage, cancelMessage;
 	protected ProgressMonitor monitor;

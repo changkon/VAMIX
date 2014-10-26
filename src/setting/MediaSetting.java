@@ -1,7 +1,7 @@
 package setting;
 
 /**
- * Contains the media settings for the VAMIX. Users can edit media settings through gui.
+ * Contains the media settings for the VAMIX.
  * 
  */
 public class MediaSetting {

@@ -54,6 +54,7 @@ public class SkipWorker extends SwingWorker<Void, Integer> {
 	@Override
 	protected void process(List<Integer> chunks) {
 		for (Integer i: chunks){
+			// Update the value of start time label and position the time slider. If the time exceeds the length of the media, stop updating.
 			if (i.longValue() <= mediaPlayer.getLength()) {
 				playbackPanel.timeSlider.setValue(i);
 				playbackPanel.startTimeLabel.setText(MediaTimer.getFormattedTime(i.longValue()));

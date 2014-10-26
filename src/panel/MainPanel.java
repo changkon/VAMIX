@@ -4,6 +4,12 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+/**
+ * Super panel which contains the mediaPanel, audioFiltersPanel and videoFilterPanel. {@link frame.VamixFrame}
+ * @author chang
+ *
+ */
+
 @SuppressWarnings("serial")
 public class MainPanel extends JPanel {
 	private static MainPanel theInstance = null;

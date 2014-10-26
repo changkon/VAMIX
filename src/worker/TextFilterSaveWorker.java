@@ -8,7 +8,7 @@ import javax.swing.ProgressMonitor;
 import operation.MediaTimer;
 
 /**
- * Encodes filter options to file. Progress is shown on progress monitor.
+ * Encodes text edit filter options to video file. Progress is shown on progress monitor.
  */
 
 public class TextFilterSaveWorker extends DefaultWorker {
@@ -36,15 +36,13 @@ public class TextFilterSaveWorker extends DefaultWorker {
 		for (Iterator<Object[]> iter = textList.iterator(); iter.hasNext();) {
 			Object[] i = iter.next();
 			
-			int visibleTime = MediaTimer.getSeconds(i[0].toString()) + MediaTimer.getDifferenceInTimeSeconds(i[0].toString(), i[1].toString());
-			
 			command.append(i[3] + ": fontsize=");
 			command.append(i[4] + ": fontcolor=");
 			command.append(i[5] + ": x=");
 			command.append(i[6] + ": y=");
 			command.append(i[7] + ": text=\'");
 			command.append(i[2] + "\': draw=\'gt(t," + MediaTimer.getSeconds(i[0].toString()) + ")*lt(t,");
-			command.append(visibleTime + ")\'");
+			command.append(MediaTimer.getSeconds(i[1].toString()) + ")\'");
 			
 			if (iter.hasNext()) {
 				command.append(":,drawtext=fontfile=");
