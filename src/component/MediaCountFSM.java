@@ -5,17 +5,17 @@ package component;
  * 
  * <b>Note:</b> The methods next() and reset() are the inputs</br>
  * 
- * <b>Input:</b> NEXT, RESET</br>
- * <b>Initial:</b> ZERO</br>
- * <b>States:</b> ZERO, ONE, TWO, THREE</br>
- * <b>Accepting:</b> THREE</br>
- * <b>Transition Function</b></br>
- * T(ZERO, NEXT) = ONE			T(ZERO, RESET) = ZERO</br>
- * T(ONE, NEXT) = TWO			T(ONE, RESET) = ZERO</br>
- * T(TWO, NEXT) = THREE			T(TWO, RESET) = ZERO</br>
- * T(THREE, NEXT) = THREE		T(THREE, RESET) = ZERO</br></br>
+ * <b>Input:</b> NEXT, RESET<br/>
+ * <b>Initial:</b> ZERO<br/>
+ * <b>States:</b> ZERO, ONE, TWO, THREE<br/>
+ * <b>Accepting:</b> THREE<br/>
+ * <b>Transition Function</b><br/>
+ * T(ZERO, NEXT) = ONE			T(ZERO, RESET) = ZERO<br/>
+ * T(ONE, NEXT) = TWO			T(ONE, RESET) = ZERO<br/>
+ * T(TWO, NEXT) = THREE			T(TWO, RESET) = ZERO<br/>
+ * T(THREE, NEXT) = THREE		T(THREE, RESET) = ZERO<br/><br/>
  * 
- * {@link frame.FullScreenMediaPlayer} </br>
+ * {@link frame.FullScreenMediaPlayer} <br/>
  * {@link panel.PlaybackPanel}
  * @author changkon
  *
