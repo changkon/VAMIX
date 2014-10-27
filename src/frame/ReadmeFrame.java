@@ -3,8 +3,6 @@ package frame;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,10 +50,8 @@ public class ReadmeFrame extends JFrame {
 	}
 	
 	private void addText() {
-		File readme = new File(getClass().getClassLoader().getResource("README.md").getFile());
-		
 		try {
-			InputStream in = new FileInputStream(readme);
+			InputStream in = getClass().getClassLoader().getResourceAsStream("README.md");
 			BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
 			
 			String line = "";
