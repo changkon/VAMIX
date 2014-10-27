@@ -63,13 +63,13 @@ Place subtitle to a video file by pressing Add Subtitle to Video button and choo
 Extraction
 ----------
 
-  Extracts AUDIO from VIDEO file.
+  Extracts AUDIO from MEDIA file.
   Must be playing a video in media player first.
   
   Specify extraction times:
     Put in times in the following format hh:mm:ss and click Extract button.
-  Extract full video
-    Click extract entire video which extracts the entire video file.
+  Extract full audio
+    Click extract entire file which extracts audio from the media file.
 
 Replace Audio
 -------------
